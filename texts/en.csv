@@ -41,4 +41,7 @@
 "plugin_exporttoolkit_configpanel_item_executor","Executor class"
 "plugin_exporttoolkit_config","Plugins - Export Toolkit"
 "plugin_exporttoolkit_configpanel_item_conditionmodificator","Condition Modificator"
-"plugin_exporttoolkit_configpanel_item_additional_info","Additional Info"
+"plugin_exporttoolkit_configpanel_item_additional_data","Additional Data"
+"plugin_exporttoolkit_configpanel_enterclonekey_prompt","Please enter the name of the new configuration"
+"plugin_exporttoolkit_configpanel_enterclonekey_title","Clone configuration"
+"plugin_exporttoolkit_configpanel_error_cloning_config","Error during cloning configuration"

@@ -141,6 +141,13 @@ pimcore.plugin.exporttoolkit.config.ConfigPanel = Class.create({
             handler: this.attributes.reference.deleteField.bind(this)
         }));
 
+        menu.add(new Ext.menu.Item({
+            text: t('duplicate'),
+            iconCls: "pimcore_icon_clone",
+            handler: this.attributes.reference.cloneField.bind(this)
+        }));
+
+
         menu.show(this.ui.getAnchor());
     },
 
@@ -178,6 +185,44 @@ pimcore.plugin.exporttoolkit.config.ConfigPanel = Class.create({
             Ext.Msg.alert(t("plugin_exporttoolkit_configpanel"), t("plugin_exporttoolkit_configpanel_invalid_name"));
         }
     },
+
+    cloneFieldComplete: function (button, value, object) {
+
+        var regresult = value.match(/[a-zA-Z0-9_\-]+/);
+        if (button == "ok" && value.length > 2 && regresult == value) {
+            Ext.Ajax.request({
+                url: "/plugin/ExportToolkit/config/clone",
+                params: {
+                    name: value,
+                    originalName: this.attributes.id
+                },
+                success: function (response) {
+                    var data = Ext.decode(response.responseText);
+
+                    this.getOwnerTree().getRootNode().reload();
+
+                    if(!data || !data.success) {
+                        pimcore.helpers.showNotification(t("error"), t("plugin_exporttoolkit_configpanel_error_cloning_config"), "error", data.message);
+                    } else {
+                        this.attributes.reference.openConfig(data.name);
+                    }
+
+                }.bind(this)
+            });
+        }
+        else if (button == "cancel") {
+            return;
+        }
+        else {
+            Ext.Msg.alert(t("plugin_exporttoolkit_configpanel"), t("plugin_exporttoolkit_configpanel_invalid_name"));
+        }
+    },
+
+    cloneField: function () {
+        Ext.MessageBox.prompt(t('plugin_exporttoolkit_configpanel_enterclonekey_title'), t('plugin_exporttoolkit_configpanel_enterclonekey_prompt'), this.attributes.reference.cloneFieldComplete.bind(this), null, null, "");
+    },
+
+
 
     deleteField: function () {
         Ext.Msg.confirm(t('delete'), t('delete_message'), function(btn){

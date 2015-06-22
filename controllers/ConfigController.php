@@ -8,8 +8,7 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
 
         $dataArray = array();
         foreach($list as $config) {
-            $dataArray[] = array("id" => $config->getName(), "text" => $config->getName(), "leaf" => true,
-            "iconCls" => "plugin_exporttoolkit_config");
+            $dataArray[] = array("id" => $config->getName(), "text" => $config->getName());
         }
 
         $this->_helper->json($dataArray);
@@ -49,8 +48,31 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
         } catch(Exception $e) {
             $this->_helper->json(["success" => false, "message" => $e->getMessage()]);
         }
-
     }
+
+    public function cloneAction() {
+        try {
+            $name = $this->getParam("name");
+
+            $config = ExportToolkit_Configuration::getByName($name);
+            if(!empty($config)) {
+                throw new Exception("Name already exists.");
+            }
+
+            $originalName = $this->getParam("originalName");
+            $originalConfig = ExportToolkit_Configuration::getByName($originalName);
+            if (!$originalConfig) {
+                throw new Exception("Configuration not found");
+            }
+            $originalConfig->setName($name);
+            $originalConfig->save($name);
+
+            $this->_helper->json(["success" => true, "name" => $name]);
+        } catch(Exception $e) {
+            $this->_helper->json(["success" => false, "message" => $e->getMessage()]);
+        }
+    }
+
 
     public function getAction() {
         $name = $this->getParam("name");
@@ -111,7 +133,7 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
             if ($classlist) {
                 foreach(preg_split("/((\r?\n)|(\r\n?))/", $classlist) as $line){
                     if ($line) {
-                        $classes[] = trim($line);
+                        $classes[] = $line;
                     }
                 }
             }
@@ -134,21 +156,13 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
         if ($additionalBlacklisted) {
             foreach(preg_split("/((\r?\n)|(\r\n?))/", $additionalBlacklisted) as $line){
                 if ($line) {
-                    $blackListedClasses[] = trim($line);
+                    $blackListedClasses[] = $line;
                 }
             }
         }
         foreach($blackListedClasses as $blackList) {
             $whiteListedClasses = preg_grep($blackList, $whiteListedClasses,  PREG_GREP_INVERT);
         }
-//
-//
-//        foreach($whiteListedClasses as $class) {
-//            echo($class . "<br>");
-//        }
-//        die();
-
-
 
         return $whiteListedClasses;
     }

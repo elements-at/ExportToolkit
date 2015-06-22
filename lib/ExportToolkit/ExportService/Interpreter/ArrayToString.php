@@ -7,7 +7,6 @@ class ExportToolkit_ExportService_Interpreter_ArrayToString implements ExportToo
         if(is_array($value)) {
             $delimiter = $config && $config->delimiter ? $config->delimiter : ",";
             $value = implode($delimiter, $value);
-
         }
         return $value;
     }

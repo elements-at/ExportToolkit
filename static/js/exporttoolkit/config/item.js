@@ -165,7 +165,7 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
             layout: "pimcoreform",
             bodyStyle: "padding:10px;",
             autoScroll: true,
-            labelWidth: 130,
+            labelWidth: 150,
             border:false,
             title: t("plugin_exporttoolkit_configpanel_item_general"),
             items: [{
@@ -281,13 +281,13 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
                     value: this.data ? this.data.general.executor : ""
                 },
                 {
+                    name: "additionalData",
+                    fieldLabel: t("plugin_exporttoolkit_configpanel_item_additional_data"),
                     xtype: "textarea",
                     width: 400,
                     height: 100,
-                    value: this.data ? this.data.general.additionalInfo : "",
-                    name: "additionalInfo",
-                    fieldLabel: t("plugin_exporttoolkit_configpanel_item_additional_info")
-                },
+                    value: this.data.general.additionalData
+                }
             ]
         });
 
