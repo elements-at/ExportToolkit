@@ -1,0 +1,1 @@
+For documentation see https://www.pimcore.org/wiki/display/PLUGINS/Export+Toolkit
