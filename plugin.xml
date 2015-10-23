@@ -37,19 +37,19 @@
                 <path>/plugins/ExportToolkit/static/js/exporttoolkit/config/item.js</path>
                 <path>/plugins/ExportToolkit/static/js/exporttoolkit/config/attributeconfig.js</path>
 			</pluginJsPaths>
-            <pluginJsPaths-extjs5>
-                <path>/plugins/ExportToolkit/static5/js/startup.js</path>
-                <path>/plugins/ExportToolkit/static5/js/exporttoolkit/config/configpanel.js</path>
-                <path>/plugins/ExportToolkit/static5/js/exporttoolkit/config/item.js</path>
-                <path>/plugins/ExportToolkit/static5/js/exporttoolkit/config/attributeconfig.js</path>
-            </pluginJsPaths-extjs5>
+            <pluginJsPaths-extjs6>
+                <path>/plugins/ExportToolkit/static6/js/startup.js</path>
+                <path>/plugins/ExportToolkit/static6/js/exporttoolkit/config/configpanel.js</path>
+                <path>/plugins/ExportToolkit/static6/js/exporttoolkit/config/item.js</path>
+                <path>/plugins/ExportToolkit/static6/js/exporttoolkit/config/attributeconfig.js</path>
+            </pluginJsPaths-extjs6>
 
 			<!-- css files with path relative to plugin-directory -->
 			<pluginCssPaths>
                 <path>/plugins/ExportToolkit/static/css/example.css</path>
 			</pluginCssPaths>
-            <pluginCssPaths-extjs5>
-                <path>/plugins/ExportToolkit/static5/css/example.css</path>
-            </pluginCssPaths-extjs5>
+            <pluginCssPaths-extjs6>
+                <path>/plugins/ExportToolkit/static6/css/example.css</path>
+            </pluginCssPaths-extjs6>
 		</plugin>
 </zend-config>
