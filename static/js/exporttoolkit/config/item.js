@@ -381,6 +381,7 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
                     tooltip: t('plugin_exporttoolkit_configpanel_item_attributeAdvanced'),
                     icon: "/pimcore/static/img/icon/cog_edit.png",
                     handler: function (grid, rowIndex) {
+                        grid.getSelectionModel().selectRow(rowIndex);
                         var data = grid.getStore().getAt(rowIndex);
                         var dialog = new pimcore.plugin.exporttoolkit.config.AttributeConfig(this.updateData, data, grid);
                         dialog.show();
