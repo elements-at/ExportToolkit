@@ -1,0 +1,16 @@
+{
+    "name": "pimcore-plugins/ExportToolkit",
+    "type": "pimcore-plugin",
+    "version": "1.1.0",
+    "require": {
+        "pimcore/installer-plugin": ">=1"
+    },
+    "autoload": {
+        "psr-0": {
+            "ExportToolkit_": [
+                "lib/ExportToolkit/",
+                "models/ExportToolkit/"
+            ]
+        }
+    }
+}
