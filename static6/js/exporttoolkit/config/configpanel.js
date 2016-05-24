@@ -64,6 +64,13 @@ pimcore.plugin.exporttoolkit.config.ConfigPanel = Class.create({
                 border: true,
                 width: 200,
                 split: true,
+                root: {
+                    //nodeType: 'async',
+                    id: '0',
+                    expanded: true,
+                    iconCls: "pimcore_icon_thumbnails"
+
+                },
                 rootVisible: false,
                 tbar: {
                     items: [

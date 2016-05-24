@@ -8,7 +8,16 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
 
         $dataArray = array();
         foreach($list as $config) {
-            $dataArray[] = array("id" => $config->getName(), "text" => $config->getName());
+            if (\Pimcore\Tool\Admin::isExtJS6()) {
+                $dataArray[] = array("id" => $config->getName(),
+                    "text" => $config->getName(),
+                    "expandable" => false,
+                    "leaf" => true
+
+                );
+            } else {
+                $dataArray[] = array("id" => $config->getName(), "text" => $config->getName());
+            }
         }
 
         $this->_helper->json($dataArray);

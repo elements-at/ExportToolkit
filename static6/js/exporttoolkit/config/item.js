@@ -40,7 +40,7 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
 
         this.parent.editPanel.add(this.tab);
         this.parent.editPanel.setActiveTab(this.tab);
-        this.parent.editPanel.doLayout();
+        this.parent.editPanel.updateLayout();
 
         this.checkExporterStatus(false);
     },
@@ -360,8 +360,8 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
 
 
         this.attributeClusterContainerInner.add(item);
-        item.doLayout();
-        this.attributeClusterContainerInner.doLayout();
+        item.updateLayout();
+        this.attributeClusterContainerInner.updateLayout();
         if(!data) {
             this.attributeClusterContainerInner.setActiveTab(item);
         }
@@ -501,14 +501,14 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
                     // move this node temorary to an other so ext recognizes a change
                     container.remove(blockElement, false);
                     tmpContainer.add(blockElement);
-                    container.doLayout();
-                    tmpContainer.doLayout();
+                    container.updateLayout();
+                    tmpContainer.updateLayout();
 
                     // move the element to the right position
                     tmpContainer.remove(blockElement,false);
                     container.insert(newIndex, blockElement);
-                    container.doLayout();
-                    tmpContainer.doLayout();
+                    container.updateLayout();
+                    tmpContainer.updateLayout();
 
                     pimcore.layout.refresh();
                 }.bind(window, index, container)
@@ -524,14 +524,14 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
                     // move this node temorary to an other so ext recognizes a change
                     container.remove(blockElement, false);
                     tmpContainer.add(blockElement);
-                    container.doLayout();
-                    tmpContainer.doLayout();
+                    container.updateLayout();
+                    tmpContainer.updateLayout();
 
                     // move the element to the right position
                     tmpContainer.remove(blockElement,false);
                     container.insert(index+1, blockElement);
-                    container.doLayout();
-                    tmpContainer.doLayout();
+                    container.updateLayout();
+                    tmpContainer.updateLayout();
 
                     pimcore.layout.refresh();
                 }.bind(window, index, container)
