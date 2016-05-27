@@ -172,8 +172,8 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
             bodyStyle: "padding:10px;",
             autoScroll: true,
             defaults: {
-                labelWidth: 130,
-                width: 530
+                labelWidth: 200,
+                width: 600
             },
             border:false,
             title: t("plugin_exporttoolkit_configpanel_item_general"),
@@ -181,7 +181,6 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
                     xtype: "textfield",
                     fieldLabel: t("text"),
                     name: "name",
-                    width: 380,
                     value: this.data.general.name,
                     readOnly: true
                 }, {
