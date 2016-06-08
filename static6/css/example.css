@@ -10,7 +10,9 @@
     background: url(/pimcore/static/img/icon/cog_go.png) no-repeat !important;
 
 }
-
+#pimcore_menu_exporttoolkit{
+    background-image: url(/pimcore/static6/img/flat-color-icons/go.svg) !important;
+}
 
 .plugin_exporttoolkit_status {
     background: url(/pimcore/static/img/icon/cog_go.png) no-repeat !important;

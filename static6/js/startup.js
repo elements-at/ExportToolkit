@@ -52,26 +52,12 @@ pimcore.plugin.ExportToolkit = Class.create(pimcore.plugin.admin, {
                 this.navEl = Ext.get(
                     searchButton.insertHtml(
                         "afterEnd",
-                        '<li id="pimcore_menu_exporttoolkit" class="pimcore_menu_item icon-upload">' + t('plugin_exporttoolkit_mainmenu') + '</li>'
+                        '<li id="pimcore_menu_exporttoolkit" data-menu-tooltip="Export Toolkit" class="pimcore_menu_item icon-upload">' + t('plugin_exporttoolkit_mainmenu') + '</li>'
                     )
                 );
 
                 this.navEl.on("mousedown", toolbar.showSubMenu.bind(menuItems));
-                this.navEl.on("mouseenter", function (e) {
-                    $("#pimcore_menu_tooltip").show();
-                    $("#pimcore_menu_tooltip").html("huschhusch2");
-
-                    // $("#pimcore_menu_tooltip").html($(this).data("menu-tooltip"));
-
-                    var offset = $(e.target).offset();
-                    var top = offset.top;
-                    top = top + ($(e.target).height() / 2);
-
-                    $("#pimcore_menu_tooltip").css({top: top});
-                });
-                this.navEl.on("mouseleave", function () {
-                    $("#pimcore_menu_tooltip").hide();
-                });
+                pimcore.helpers.initMenuTooltips();
             }
 
         }
