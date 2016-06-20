@@ -1,11 +1,14 @@
 <?php
 
+use \Pimcore\Tool\SimpleXMLExtended;
+
 class ExportToolkit_ExportService_AttributeClusterInterpreter_DefaultXml extends ExportToolkit_ExportService_AttributeClusterInterpreter_Abstract {
 
     protected $firstData = true;
 
     public function __construct($config) {
         parent::__construct($config);
+
         $this->firstData = true;
     }
 
@@ -33,9 +36,37 @@ class ExportToolkit_ExportService_AttributeClusterInterpreter_DefaultXml extends
 
     public function createXml($data, $xml = NULL) {
         $first = $xml;
-        if($xml === NULL) $xml = new SimpleXMLElement('<' . ($this->config->rootElement ? $this->config->rootElement : 'root') . '/>');
+        if($xml === NULL){
+            $xml = new SimpleXMLExtended('<' . ($this->config->rootElement ?: 'root') . '/>');
+        }
+
         foreach ($data as $k => $v) {
-            is_array($v) ? $this->createXml($v, $xml->addChild(($this->config->rowElementName ? $this->config->rowElementName : 'row'))) : $xml->addChild($k, $v);
+
+
+            if(is_array($v)){
+                $rowName = ($this->config->rowElementName ?: 'row');
+
+                //for nested fields
+                if(!is_numeric($k)){
+                    $rowName = $k;
+                }
+
+                //if childs need neseted rowElementNames they can be defined in the config
+                if($this->config->{'rowElementName'.ucfirst($xml->getName())}){
+                    $rowName = $this->config->{'rowElementName'.ucfirst($xml->getName())};
+                }
+
+                $child = $xml->addChild($rowName);
+                $this->createXml($v, $child);
+            }else{
+                $sData = (string) $v;
+                $child = @$xml->addChild($k, $sData);
+                //need a cdata block
+                if ((string)$child != $sData) {
+                    $xml->{$k} = null;
+                    $xml->{$k}->addCData((string) $v);
+                }
+            }
         }
         return ($first === NULL) ? $xml->asXML() : $xml;
     }
