@@ -74,7 +74,9 @@ class ExportToolkit_ExportService {
 
         Pimcore_Log_Simple::log("export-toolkit-" . $workerName, "");
 
-        $page = 0;
+        $limit = (int)$worker->getWorkerConfig()->getConfiguration()->general->limit;
+
+        $page = $i = 0;
         $pageSize = 100;
         $count = $pageSize;
 
@@ -95,6 +97,10 @@ class ExportToolkit_ExportService {
                     $worker->updateExport($object);
                 } else {
                     Pimcore_Log_Simple::log("export-toolkit-" . $workerName, "do not update export object " . $object->getId() . " for " . $workerName . ".");
+                }
+                $i++;
+                if($limit && ($i == $limit)){
+                    break 2;
                 }
             }
             $page++;

@@ -221,6 +221,12 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
                     name: "sqlOrder",
                     value: this.data ? this.data.general.sqlOrder : ""
                 },
+                {
+                    xtype: "numberfield",
+                    fieldLabel: t("plugin_exporttoolkit_configpanel_item_limit"),
+                    name: "limit",
+                    value: this.data ? this.data.general.limit: ""
+                },
                 new Ext.form.ComboBox({
                     name: "queryLanguage",
                     store: pimcore.settings.websiteLanguages,

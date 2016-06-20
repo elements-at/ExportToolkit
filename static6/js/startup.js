@@ -62,7 +62,6 @@ pimcore.plugin.ExportToolkit = Class.create(pimcore.plugin.admin, {
 
         }
 
-        // alert("Example Ready!");
     }
 });
 

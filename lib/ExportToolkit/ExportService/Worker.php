@@ -78,6 +78,14 @@ class ExportToolkit_ExportService_Worker {
         }
     }
 
+    /**
+     * @return ExportToolkit_Configuration
+     */
+    public function getWorkerConfig()
+    {
+        return $this->workerConfig;
+    }
+
     public function updateExport(Object_Abstract $object) {
 
 
