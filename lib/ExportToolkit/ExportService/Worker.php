@@ -35,7 +35,7 @@ class ExportToolkit_ExportService_Worker {
         }
 
         $workerConfigClassName = trim($workerConfig->getConfiguration()->general->filterClass);
-        if(class_exists($workerConfigClassName)) {
+        if(Pimcore\Tool::classExists($workerConfigClassName)) {
             $this->workerConfigClass = new $workerConfigClassName();
         } else {
             $this->workerConfigClass = new ExportToolkit_ExportService_Filter_Default();
@@ -45,7 +45,7 @@ class ExportToolkit_ExportService_Worker {
         if($clusters) {
             foreach($clusters as $attributeCluster) {
 
-                if(class_exists($attributeCluster->clusterInterpreterClass)) {
+                if(Pimcore\Tool::classExists($attributeCluster->clusterInterpreterClass)) {
                     $interpreterClass = trim($attributeCluster->clusterInterpreterClass);
                     $clusterInterpreter = new $interpreterClass($attributeCluster->attributeClusterConfig);
 

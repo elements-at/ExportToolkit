@@ -2,6 +2,8 @@
 
 class ExportToolkit_ExportService {
 
+    use \ProcessManager\ExecutionTrait;
+
     /**
      * @var ExportToolkit_ExportService_Worker[]
      */
@@ -72,7 +74,16 @@ class ExportToolkit_ExportService {
 
     protected function doExecuteExport(ExportToolkit_ExportService_Worker $worker, $workerName) {
 
+        $this->initProcessManager(null, ["name" => $workerName, "autoCreate" => true]);
+
+        $monitoringItem = $this->getMonitoringItem();
+        $monitoringItem->getLogger()->info("export-toolkit-" . $workerName);
+
         Pimcore_Log_Simple::log("export-toolkit-" . $workerName, "");
+
+        //step 1 - setting up export
+        $monitoringItem->setTotalSteps(3)->setCurrentStep(1)->setMessage("Setting up export $workerName")->save();
+        $monitoringItem->getLogger()->info($monitoringItem->getMessage());
 
         $limit = (int)$worker->getWorkerConfig()->getConfiguration()->general->limit;
 
@@ -80,12 +91,21 @@ class ExportToolkit_ExportService {
         $pageSize = 100;
         $count = $pageSize;
 
+        $totalObjectCount = $worker->getObjectList()->count();
         $this->setUpExport(false);
+
+
+        //step 2 - exporting data
+        $monitoringItem->setCurrentStep(2)->setMessage("Starting Exporting Data")->setTotalWorkload($totalObjectCount)->save();
+        $monitoringItem->getLogger()->info($monitoringItem->getMessage());
 
         while($count > 0) {
             Pimcore_Log_Simple::log("export-toolkit-" . $workerName, "=========================");
             Pimcore_Log_Simple::log("export-toolkit-" . $workerName, "Page $workerName: $page");
             Pimcore_Log_Simple::log("export-toolkit-" . $workerName, "=========================");
+
+            $monitoringItem->setDefaultProcessMessage("Exporting Data...")->save();
+            $monitoringItem->getLogger()->info("Exporting Data, starting page: $page");
 
             $objects = $worker->getObjectList();
             $objects->setOffset($page * $pageSize);
@@ -93,9 +113,13 @@ class ExportToolkit_ExportService {
 
             foreach($objects as $object) {
                 Pimcore_Log_Simple::log("export-toolkit-" . $workerName, "Updating product " . $object->getId());
+
+                $monitoringItem->getLogger()->debug("Updating product " . $object->getId());
+
                 if($worker->checkClass($object)) {
                     $worker->updateExport($object);
                 } else {
+                    $monitoringItem->getLogger()->debug("do not update export object " . $object->getId() . " for " . $workerName . ".");
                     Pimcore_Log_Simple::log("export-toolkit-" . $workerName, "do not update export object " . $object->getId() . " for " . $workerName . ".");
                 }
                 $i++;
@@ -106,11 +130,22 @@ class ExportToolkit_ExportService {
             $page++;
             $count = count($objects->getObjects());
 
+            $monitoringItem->setCurrentWorkload($page * $pageSize)->setTotalWorkload($totalObjectCount)->save();
+            $monitoringItem->getLogger()->info("Process Export $workerName, finished page: $page");
+
             Pimcore::collectGarbage();
         }
 
+        $monitoringItem->setWorloadCompleted()->save();
+
+
+        //step 3 - committing data
+        $monitoringItem->setCurrentStep(3)->setMessage("Committing Data")->save();
+        $monitoringItem->getLogger()->info($monitoringItem->getMessage());
+
         $worker->commitData();
 
+        $monitoringItem->setMessage('Job finished')->setCompleted();
     }
 
 }

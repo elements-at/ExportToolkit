@@ -185,10 +185,12 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
 
             $implementsIConfig = array();
             foreach($classes as $class) {
+                try {
                     $reflect = new ReflectionClass($class);
-                if(is_subclass_of($class, "ExportToolkit_ExportService_AttributeClusterInterpreter_Abstract") && $reflect->isInstantiable()) {
+                    if (is_subclass_of($class, "ExportToolkit_ExportService_AttributeClusterInterpreter_Abstract") && $reflect->isInstantiable()) {
                         $implementsIConfig[] = array($class);
-                }
+                    }
+                } catch (Exception $e) {}
             }
 
             $this->_helper->json($implementsIConfig);
@@ -197,10 +199,12 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
 
             $implementsIConfig = array();
             foreach($classes as $class) {
-                $reflect = new ReflectionClass($class);
-                if($reflect->implementsInterface('ExportToolkit_ExportService_IFilter') && $reflect->isInstantiable()) {
-                    $implementsIConfig[] = array($class);
-                }
+                try {
+                    $reflect = new ReflectionClass($class);
+                    if ($reflect->implementsInterface('ExportToolkit_ExportService_IFilter') && $reflect->isInstantiable()) {
+                        $implementsIConfig[] = array($class);
+                    }
+                } catch (Exception $e) {}
             }
 
             $this->_helper->json($implementsIConfig);
@@ -209,10 +213,12 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
 
             $implementsIConfig = array();
             foreach($classes as $class) {
-                $reflect = new ReflectionClass($class);
-                if($reflect->implementsInterface('ExportToolkit_ExportService_IConditionModificator') && $reflect->isInstantiable()) {
-                    $implementsIConfig[] = array($class);
-                }
+                try {
+                    $reflect = new ReflectionClass($class);
+                    if($reflect->implementsInterface('ExportToolkit_ExportService_IConditionModificator') && $reflect->isInstantiable()) {
+                        $implementsIConfig[] = array($class);
+                    }
+                } catch (Exception $e) {}
             }
 
             $this->_helper->json($implementsIConfig);
@@ -221,10 +227,12 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
 
             $implementsIConfig = array();
             foreach($classes as $class) {
-                $reflect = new ReflectionClass($class);
-                if($reflect->implementsInterface('ExportToolkit_ExportService_IGetter') && $reflect->isInstantiable()) {
-                    $implementsIConfig[] = array($class);
-                }
+                try {
+                    $reflect = new ReflectionClass($class);
+                    if ($reflect->implementsInterface('ExportToolkit_ExportService_IGetter') && $reflect->isInstantiable()) {
+                        $implementsIConfig[] = array($class);
+                    }
+                } catch (Exception $e) {}
             }
 
             $this->_helper->json($implementsIConfig);
@@ -233,10 +241,12 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
 
             $implementsIConfig = array();
             foreach($classes as $class) {
-                $reflect = new ReflectionClass($class);
-                if($reflect->implementsInterface('ExportToolkit_ExportService_IInterpreter') && $reflect->isInstantiable()) {
-                    $implementsIConfig[] = array($class);
-                }
+                try {
+                    $reflect = new ReflectionClass($class);
+                    if ($reflect->implementsInterface('ExportToolkit_ExportService_IInterpreter') && $reflect->isInstantiable()) {
+                        $implementsIConfig[] = array($class);
+                    }
+                } catch (Exception $e) {}
             }
 
             $this->_helper->json($implementsIConfig);
