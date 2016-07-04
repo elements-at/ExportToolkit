@@ -83,7 +83,6 @@ class ExportToolkit_ExportService {
 
         //step 1 - setting up export
         $monitoringItem->setTotalSteps(3)->setCurrentStep(1)->setMessage("Setting up export $workerName")->save();
-        $monitoringItem->getLogger()->info($monitoringItem->getMessage());
 
         $limit = (int)$worker->getWorkerConfig()->getConfiguration()->general->limit;
 
@@ -97,21 +96,20 @@ class ExportToolkit_ExportService {
 
         //step 2 - exporting data
         $monitoringItem->setCurrentStep(2)->setMessage("Starting Exporting Data")->setTotalWorkload($totalObjectCount)->save();
-        $monitoringItem->getLogger()->info($monitoringItem->getMessage());
 
         while($count > 0) {
             Pimcore_Log_Simple::log("export-toolkit-" . $workerName, "=========================");
             Pimcore_Log_Simple::log("export-toolkit-" . $workerName, "Page $workerName: $page");
             Pimcore_Log_Simple::log("export-toolkit-" . $workerName, "=========================");
 
-            $monitoringItem->setDefaultProcessMessage("Exporting Data...")->save();
-            $monitoringItem->getLogger()->info("Exporting Data, starting page: $page");
-
             $objects = $worker->getObjectList();
-            $objects->setOffset($page * $pageSize);
+            $offset = $page * $pageSize;
+            $objects->setOffset($offset);
             $objects->setLimit($pageSize);
 
-            foreach($objects as $object) {
+            $items = $objects->load();
+            $monitoringItem->setCurrentWorkload(($offset) ?:1 )->setDefaultProcessMessage($items[0] ? $items[0]->getClassName() : 'Items')->save();
+            foreach($items as $object) {
                 Pimcore_Log_Simple::log("export-toolkit-" . $workerName, "Updating product " . $object->getId());
 
                 $monitoringItem->getLogger()->debug("Updating product " . $object->getId());
@@ -141,7 +139,6 @@ class ExportToolkit_ExportService {
 
         //step 3 - committing data
         $monitoringItem->setCurrentStep(3)->setMessage("Committing Data")->save();
-        $monitoringItem->getLogger()->info($monitoringItem->getMessage());
 
         $worker->commitData();
 

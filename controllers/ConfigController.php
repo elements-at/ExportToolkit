@@ -82,6 +82,9 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
         }
     }
 
+    protected function getCliCommand($configName){
+        return Pimcore_Tool_Console::getPhpCli() . " " . PIMCORE_DOCUMENT_ROOT.'/pimcore/cli/console.php export-toolkit:export --config-name="' . $configName.'"';
+    }
 
     public function getAction() {
         $name = $this->getParam("name");
@@ -91,14 +94,12 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
             throw new Exception("Name does not exist.");
         }
 
-        $cli = Pimcore_Tool_Console::getPhpCli() . " " . realpath(PIMCORE_PLUGINS_PATH . DIRECTORY_SEPARATOR . "ExportToolkit" . DIRECTORY_SEPARATOR . "cli" . DIRECTORY_SEPARATOR . "executeExport.php"). " " . $configuration->getName();
-
         if ($configuration && $configuration->configuration->general->executor) {
             /** @var  $className ExportToolkit_ExportService_IExecutor */
             $className = $configuration->configuration->general->executor;
             $cli = $className::getCli($name, null);
         } else {
-            $cli = Pimcore_Tool_Console::getPhpCli() . " " . realpath(PIMCORE_PLUGINS_PATH . DIRECTORY_SEPARATOR . "ExportToolkit" . DIRECTORY_SEPARATOR . "cli" . DIRECTORY_SEPARATOR . "executeExport.php"). " " . $configuration->getName();
+            $cli = $this->getCliCommand($configuration->getName());
         }
 
         $this->_helper->json(
@@ -284,8 +285,7 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
             if (Tool_Lock::isLocked($lockkey, 3 * 60 * 60)) { //lock for 3h
                 $this->_helper->json(["success" => false]);
             }
-
-            $cmd = Pimcore_Tool_Console::getPhpCli() . " " . realpath(PIMCORE_PLUGINS_PATH . DIRECTORY_SEPARATOR . "ExportToolkit" . DIRECTORY_SEPARATOR . "cli" . DIRECTORY_SEPARATOR . "executeExport.php") . " " . $workername;
+            $cmd = $this->getCliCommand($workername);
             Logger::info($cmd);
             Pimcore_Tool_Console::execInBackground($cmd, PIMCORE_LOG_DIRECTORY . DIRECTORY_SEPARATOR . "exporttoolkit-output.log");
         }

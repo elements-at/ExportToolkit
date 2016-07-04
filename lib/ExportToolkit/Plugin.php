@@ -4,6 +4,13 @@ class ExportToolkit_Plugin  extends Pimcore_API_Plugin_Abstract implements Pimco
 
     protected $exportService;
 
+    public function init(){
+        parent::init();
+        \Pimcore::getEventManager()->attach('system.console.init', function (\Zend_EventManager_Event $e) {
+            $application = $e->getTarget();
+            $application->add(new \ExportToolkit\Console\Command\ExportCommand());
+        });
+    }
     public function __construct($jsPaths = null, $cssPaths = null) {
         parent::__construct($jsPaths, $cssPaths);
     }

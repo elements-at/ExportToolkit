@@ -10,7 +10,12 @@ class ExportToolkit_ExportService_AttributeClusterInterpreter_DefaultCsv extends
     }
 
     protected function getExportFile() {
-        return PIMCORE_DOCUMENT_ROOT . "/" . ($this->config->filename ? $this->config->filename  : "website/var/plugins/ExportToolkit/export.csv");
+        $file = PIMCORE_DOCUMENT_ROOT . "/" . ($this->config->filename ? $this->config->filename  : "website/var/plugins/ExportToolkit/export.csv");
+        $dir = dirname($file);
+        if(!is_dir($dir)){
+            \Pimcore\File::mkdir($dir);
+        }
+        return $file;
     }
 
     protected function doCommitData() {
