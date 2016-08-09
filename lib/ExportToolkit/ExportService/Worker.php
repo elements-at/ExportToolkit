@@ -1,19 +1,24 @@
 <?php
 
-class ExportToolkit_ExportService_Worker {
+namespace ExportToolkit\ExportService;
+
+use ExportToolkit\Configuration;
+use ExportToolkit\ExportService\AttributeClusterInterpreter\AbstractAttributeClusterInterpreter;
+use ExportToolkit\ExportService\Filter\DefaultFilter;
+use Pimcore\Model\Object\AbstractObject;
+use Pimcore\Model\Object\Localizedfield;
+
+class Worker {
 
     /**
-     * @var ExportToolkit_Configuration
+     * @var Configuration
      */
     protected $workerConfig;
 
-    /**
-     * @var ExportToolkit_ExportService_IConfig
-     */
     protected $workerConfigClass;
 
     /**
-     * @var ExportToolkit_ExportService_AttributeClusterInterpreter_Abstract[]
+     * @var AbstractAttributeClusterInterpreter[]
      */
     protected $clusterInterpreters;
     protected $clusterInterpreterAttributes;
@@ -23,29 +28,29 @@ class ExportToolkit_ExportService_Worker {
      */
     protected $pimcoreClass;
 
-    public function __construct(ExportToolkit_Configuration $workerConfig) {
+    public function __construct(Configuration $workerConfig) {
         $this->workerConfig = $workerConfig;
 
         $classId = trim($workerConfig->getConfiguration()->general->pimcoreClass);
         if ($classId) {
-            $class = Object_Class::getById($classId);
+            $class = \Pimcore\Model\Object\ClassDefinition::getById($classId);
             $this->pimcoreClass = trim("Object_" . ucfirst($class->getName()));
         } else {
             $this->pimcoreClass = "Object_Abstract";
         }
 
         $workerConfigClassName = trim($workerConfig->getConfiguration()->general->filterClass);
-        if(Pimcore\Tool::classExists($workerConfigClassName)) {
+        if(class_exists($workerConfigClassName)) {
             $this->workerConfigClass = new $workerConfigClassName();
         } else {
-            $this->workerConfigClass = new ExportToolkit_ExportService_Filter_Default();
+            $this->workerConfigClass = new DefaultFilter();
         }
 
         $clusters = $workerConfig->getConfiguration()->attributeClusters;
         if($clusters) {
             foreach($clusters as $attributeCluster) {
 
-                if(Pimcore\Tool::classExists($attributeCluster->clusterInterpreterClass)) {
+                if(class_exists($attributeCluster->clusterInterpreterClass)) {
                     $interpreterClass = trim($attributeCluster->clusterInterpreterClass);
                     $clusterInterpreter = new $interpreterClass($attributeCluster->attributeClusterConfig);
 
@@ -53,13 +58,13 @@ class ExportToolkit_ExportService_Worker {
                     $this->clusterInterpreterAttributes[] = $attributeCluster->attributes;
 
                 } else {
-                    throw new Exception("Cluster interpreter class " . $attributeCluster->clusterInterpreterClass . " not found.");
+                    throw new \Exception("Cluster interpreter class " . $attributeCluster->clusterInterpreterClass . " not found.");
                 }
             }
         }
     }
 
-    public function checkClass(Object_Abstract $object) {
+    public function checkClass(AbstractObject $object) {
         return $object instanceof $this->pimcoreClass;
     }
 
@@ -70,7 +75,7 @@ class ExportToolkit_ExportService_Worker {
         return true;
     }
 
-    public function deleteFromExport(Object_Abstract $object) {
+    public function deleteFromExport(AbstractObject $object) {
         if($this->clusterInterpreters) {
             foreach($this->clusterInterpreters as $clusterInterpreter) {
                 $clusterInterpreter->deleteFromExport($object);
@@ -79,27 +84,27 @@ class ExportToolkit_ExportService_Worker {
     }
 
     /**
-     * @return ExportToolkit_Configuration
+     * @return Configuration
      */
     public function getWorkerConfig()
     {
         return $this->workerConfig;
     }
 
-    public function updateExport(Object_Abstract $object) {
+    public function updateExport(AbstractObject $object) {
 
 
         if($this->clusterInterpreters && $this->workerConfigClass->doExport($object, $this->workerConfig) && $this->checkObjectInCondition($object)) {
 
-            $originalInAdmin = Pimcore::inAdmin();
-            $originalGetInheritedValues = Object_Abstract::doGetInheritedValues();
-            $originalHideUnpublished = Object_Abstract::doHideUnpublished();
-            $originalGetFallbackValues = Object_Localizedfield::doGetFallbackValues();
+            $originalInAdmin = \Pimcore::inAdmin();
+            $originalGetInheritedValues = AbstractObject::doGetInheritedValues();
+            $originalHideUnpublished = AbstractObject::doHideUnpublished();
+            $originalGetFallbackValues = Localizedfield::doGetFallbackValues();
 
-            Pimcore::unsetAdminMode();
-            Object_Abstract::setGetInheritedValues(true);
-            Object_Abstract::setHideUnpublished(false);
-            Object_Localizedfield::setGetFallbackValues(true);
+            \Pimcore::unsetAdminMode();
+            AbstractObject::setGetInheritedValues(true);
+            AbstractObject::setHideUnpublished(false);
+            Localizedfield::setGetFallbackValues(true);
 
 
 
@@ -139,8 +144,8 @@ class ExportToolkit_ExportService_Worker {
 
                             $clusterInterpreter->setData($object, $name, $value);
 
-                        } catch(Exception $e) {
-                            Logger::err("Exception in ExportService: " . $e->getMessage(), $e);
+                        } catch(\Exception $e) {
+                            \Logger::err("Exception in ExportService: " . $e->getMessage(), $e);
                         }
                     }
                 }
@@ -150,15 +155,15 @@ class ExportToolkit_ExportService_Worker {
             }
 
             if($originalInAdmin) {
-                Pimcore::setAdminMode();
+                \Pimcore::setAdminMode();
             }
-            Object_Abstract::setGetInheritedValues($originalGetInheritedValues);
-            Object_Abstract::setHideUnpublished($originalHideUnpublished);
-            Object_Localizedfield::setGetFallbackValues($originalGetFallbackValues);
+            AbstractObject::setGetInheritedValues($originalGetInheritedValues);
+            AbstractObject::setHideUnpublished($originalHideUnpublished);
+            Localizedfield::setGetFallbackValues($originalGetFallbackValues);
 
 
         } else {
-            Logger::info("Don't adding product " . $object->getId() . " to export.");
+            \Logger::info("Don't adding product " . $object->getId() . " to export.");
             $this->deleteFromExport($object);
         }
     }

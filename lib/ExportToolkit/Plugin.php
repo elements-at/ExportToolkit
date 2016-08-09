@@ -1,23 +1,18 @@
 <?php
 
-class ExportToolkit_Plugin  extends Pimcore_API_Plugin_Abstract implements Pimcore_API_Plugin_Interface {
+namespace ExportToolkit;
+
+class Plugin extends \Pimcore\API\Plugin\AbstractPlugin implements \Pimcore\API\Plugin\PluginInterface {
 
     protected $exportService;
 
-    public function init(){
-        parent::init();
-        \Pimcore::getEventManager()->attach('system.console.init', function (\Zend_EventManager_Event $e) {
-            $application = $e->getTarget();
-            $application->add(new \ExportToolkit\Console\Command\ExportCommand());
-        });
-    }
     public function __construct($jsPaths = null, $cssPaths = null) {
         parent::__construct($jsPaths, $cssPaths);
     }
 
     private function getExportService() {
         if(empty($this->exportService)) {
-            $this->exportService = new ExportToolkit_ExportService();
+            $this->exportService = new ExportService();
         }
         return $this->exportService;
     }
@@ -44,8 +39,8 @@ class ExportToolkit_Plugin  extends Pimcore_API_Plugin_Abstract implements Pimco
             $this->getExportService()->setUpExport(true);
             $this->getExportService()->updateExport($object, true);
             $this->getExportService()->commitData(true);
-        } catch (Exception $e) {
-            Logger::error($e);
+        } catch (\Exception $e) {
+            \Logger::error($e);
         }
 
     }
@@ -55,8 +50,8 @@ class ExportToolkit_Plugin  extends Pimcore_API_Plugin_Abstract implements Pimco
             $this->getExportService()->setUpExport(true);
             $this->getExportService()->updateExport($object, true);
             $this->getExportService()->commitData(true);
-        } catch (Exception $e) {
-            Logger::error($e);
+        } catch (\Exception $e) {
+            \Logger::error($e);
         }
     }
 
@@ -66,8 +61,8 @@ class ExportToolkit_Plugin  extends Pimcore_API_Plugin_Abstract implements Pimco
             $this->getExportService()->setUpExport(true, "delete");
             $this->getExportService()->deleteFromExport($object, true);
             $this->getExportService()->commitData(true, "delete");
-        } catch (Exception $e) {
-            Logger::error($e);
+        } catch (\Exception $e) {
+            \Logger::error($e);
         }
     }
 

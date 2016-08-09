@@ -1,6 +1,10 @@
 <?php
 
-class ExportToolkit_ExportService_AttributeClusterInterpreter_DefaultCsv extends ExportToolkit_ExportService_AttributeClusterInterpreter_Abstract {
+namespace ExportToolkit\ExportService\AttributeClusterInterpreter;
+
+use Pimcore\Model\Object\AbstractObject;
+
+class DefaultCsv extends AbstractAttributeClusterInterpreter {
 
     protected $firstData = true;
 
@@ -10,12 +14,7 @@ class ExportToolkit_ExportService_AttributeClusterInterpreter_DefaultCsv extends
     }
 
     protected function getExportFile() {
-        $file = PIMCORE_DOCUMENT_ROOT . "/" . ($this->config->filename ? $this->config->filename  : "website/var/plugins/ExportToolkit/export.csv");
-        $dir = dirname($file);
-        if(!is_dir($dir)){
-            \Pimcore\File::mkdir($dir);
-        }
-        return $file;
+        return PIMCORE_DOCUMENT_ROOT . "/" . ($this->config->filename ? $this->config->filename  : "website/var/plugins/ExportToolkit/export.csv");
     }
 
     protected function doCommitData() {
@@ -41,7 +40,7 @@ class ExportToolkit_ExportService_AttributeClusterInterpreter_DefaultCsv extends
     }
 
 
-    public function commitDataRow(Object_Abstract $object) {
+    public function commitDataRow(AbstractObject $object) {
         if(count($this->data) > 500) {
             $this->doCommitData();
         }
@@ -52,7 +51,7 @@ class ExportToolkit_ExportService_AttributeClusterInterpreter_DefaultCsv extends
         $this->doCommitData();
     }
 
-    public function deleteFromExport(Object_Abstract $object) {
+    public function deleteFromExport(AbstractObject $object) {
         // nothing to do here
     }
 

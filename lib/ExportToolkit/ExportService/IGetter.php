@@ -1,7 +1,8 @@
 <?php
 
+namespace ExportToolkit\ExportService;
 
-interface ExportToolkit_ExportService_IGetter {
+interface IGetter {
 
     public static function get($object, $config = null);
 

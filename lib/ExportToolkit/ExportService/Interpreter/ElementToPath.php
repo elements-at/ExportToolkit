@@ -1,10 +1,14 @@
 <?php
 
+namespace ExportToolkit\ExportService\Interpreter;
 
-class ExportToolkit_ExportService_Interpreter_ElementToPath implements ExportToolkit_ExportService_IInterpreter {
+use ExportToolkit\ExportService\IInterpreter;
+use Pimcore\Model\Element\ElementInterface;
+
+class ElementToPath implements IInterpreter {
 
     public static function interpret($value, $config = null) {
-        if($value instanceof Element_Interface) {
+        if($value instanceof ElementInterface) {
             return (string) $value;
         }
         return ""; 

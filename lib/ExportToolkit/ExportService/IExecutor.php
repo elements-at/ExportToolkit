@@ -1,6 +1,8 @@
 <?php
 
-interface ExportToolkit_ExportService_IExecutor {
+namespace ExportToolkit\ExportService;
+
+interface IExecutor {
 
     public static function execute($workerName, $options = array());
 

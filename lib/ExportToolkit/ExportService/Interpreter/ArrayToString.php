@@ -1,7 +1,10 @@
 <?php
 
+namespace ExportToolkit\ExportService\Interpreter;
 
-class ExportToolkit_ExportService_Interpreter_ArrayToString implements ExportToolkit_ExportService_IInterpreter {
+use ExportToolkit\ExportService\IInterpreter;
+
+class ArrayToString implements IInterpreter {
 
     public static function interpret($value, $config = null) {
         if(is_array($value)) {

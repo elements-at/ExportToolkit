@@ -1,6 +1,8 @@
 <?php
 
-interface ExportToolkit_ExportService_IInterpreter {
+namespace ExportToolkit\ExportService;
+
+interface IInterpreter {
 
     public static function interpret($value, $config = null);
 

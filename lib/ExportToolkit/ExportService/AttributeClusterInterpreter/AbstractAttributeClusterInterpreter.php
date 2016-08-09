@@ -1,6 +1,10 @@
 <?php
 
-abstract class ExportToolkit_ExportService_AttributeClusterInterpreter_Abstract {
+namespace ExportToolkit\ExportService\AttributeClusterInterpreter;
+
+use Pimcore\Model\Object\AbstractObject;
+
+abstract class AbstractAttributeClusterInterpreter {
 
     protected $data;
 
@@ -20,11 +24,11 @@ abstract class ExportToolkit_ExportService_AttributeClusterInterpreter_Abstract 
     /**
      * used internally to set data to the data array
      *
-     * @param Object_Abstract $object
+     * @param AbstractObject $object
      * @param $key
      * @param $value
      */
-    public function setData(Object_Abstract $object, $key, $value) {
+    public function setData(AbstractObject $object, $key, $value) {
         $rowData = $this->data[$object->getId()];
         $rowData[$key] = $value;
         $this->data[$object->getId()] = $rowData;
@@ -37,9 +41,9 @@ abstract class ExportToolkit_ExportService_AttributeClusterInterpreter_Abstract 
      * write the exported entries to a file, etc.
      * If not needed, just leave the method empty.
      *
-     * @param Object_Abstract $object
+     * @param AbstractObject $object
      */
-    public abstract function commitDataRow(Object_Abstract $object);
+    public abstract function commitDataRow(AbstractObject $object);
 
     /**
      * This method is executed after all objects are exported.
@@ -53,16 +57,16 @@ abstract class ExportToolkit_ExportService_AttributeClusterInterpreter_Abstract 
      * This method is executed of an object is not exported (anymore).
      * For example it can be used to remove the entries from a destination database, etc.
      *
-     * @param Object_Abstract $object
+     * @param AbstractObject $object
      */
-    public abstract function deleteFromExport(Object_Abstract $object);
+    public abstract function deleteFromExport(AbstractObject $object);
 
 
     /** Override point
-     * @param Object_Abstract $object
+     * @param AbstractObject $object
      * @return bool return true if interpreter wants to consume the object
      */
-    public function isRelevant(Object_Abstract $object) {
+    public function isRelevant(AbstractObject $object) {
         return true;
     }
 

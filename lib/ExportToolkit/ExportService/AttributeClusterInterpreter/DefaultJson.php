@@ -1,6 +1,10 @@
 <?php
 
-class ExportToolkit_ExportService_AttributeClusterInterpreter_DefaultJson extends ExportToolkit_ExportService_AttributeClusterInterpreter_Abstract {
+namespace ExportToolkit\ExportService\AttributeClusterInterpreter;
+
+use Pimcore\Model\Object\AbstractObject;
+
+class DefaultJson extends AbstractAttributeClusterInterpreter {
 
     protected $firstData = true;
 
@@ -14,7 +18,7 @@ class ExportToolkit_ExportService_AttributeClusterInterpreter_DefaultJson extend
     }
 
 
-    public function commitDataRow(Object_Abstract $object) {
+    public function commitDataRow(AbstractObject $object) {
     }
 
 
@@ -22,7 +26,7 @@ class ExportToolkit_ExportService_AttributeClusterInterpreter_DefaultJson extend
         file_put_contents($this->getExportFile(), json_encode(array_values($this->data), JSON_PRETTY_PRINT));
     }
 
-    public function deleteFromExport(Object_Abstract $object) {
+    public function deleteFromExport(AbstractObject $object) {
         // nothing to do here
     }
 

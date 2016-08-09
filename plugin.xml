@@ -15,12 +15,13 @@
         <pluginIframeSrc>/plugin/ExportToolkit/admin/settings</pluginIframeSrc>
 
         <!-- className of the plugin which extends Pimcore_API_Plugin_Abstract-->
-        <pluginClassName>ExportToolkit_Plugin</pluginClassName>
+        <pluginClassName>\ExportToolkit\Plugin</pluginClassName>
 
         <!-- include paths relative to plugin-directory -->
         <pluginIncludePaths>
             <path>/ExportToolkit/lib</path>
             <path>/ExportToolkit/models</path>
+            <path>/ExportToolkit/controllers</path>
         </pluginIncludePaths>
 
         <!-- namespaces to register with autoloader-->
@@ -30,24 +31,15 @@
 
         <!-- js files with path relative to plugin-directory -->
         <pluginJsPaths>
-            <path>/plugins/ExportToolkit/static/js/startup.js</path>
-            <path>/plugins/ExportToolkit/static/js/exporttoolkit/config/configpanel.js</path>
-            <path>/plugins/ExportToolkit/static/js/exporttoolkit/config/item.js</path>
-            <path>/plugins/ExportToolkit/static/js/exporttoolkit/config/attributeconfig.js</path>
-        </pluginJsPaths>
-        <pluginJsPaths-extjs6>
             <path>/plugins/ExportToolkit/static6/js/startup.js</path>
             <path>/plugins/ExportToolkit/static6/js/exporttoolkit/config/configpanel.js</path>
             <path>/plugins/ExportToolkit/static6/js/exporttoolkit/config/item.js</path>
             <path>/plugins/ExportToolkit/static6/js/exporttoolkit/config/attributeconfig.js</path>
-        </pluginJsPaths-extjs6>
+        </pluginJsPaths>
 
         <!-- css files with path relative to plugin-directory -->
         <pluginCssPaths>
-            <path>/plugins/ExportToolkit/static/css/example.css</path>
-        </pluginCssPaths>
-        <pluginCssPaths-extjs6>
             <path>/plugins/ExportToolkit/static6/css/example.css</path>
-        </pluginCssPaths-extjs6>
+        </pluginCssPaths>
     </plugin>
 </zend-config>

@@ -1,7 +1,8 @@
 <?php
 
+namespace ExportToolkit\ExportService;
 
-interface ExportToolkit_ExportService_IConditionModificator {
+interface IConditionModificator {
 
     public static function modify($configName, $condidition);
 

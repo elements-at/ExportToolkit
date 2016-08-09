@@ -1,32 +1,45 @@
 <?php
 
-class ExportToolkit_Helper {
+namespace ExportToolkit;
 
-    protected static $_pluginConfig;
+use Pimcore\Config;
+use Pimcore\File;
 
+class Helper
+{
+    /**
+     * @var \Zend_Config $_pluginConfig
+     */
+    private static $_pluginConfig;
+
+    /**
+     * get the path to the plugin configuration file.
+     *
+     * @return string
+     *  path to config
+     */
     public static function getConfigFilePath()
     {
-        $path = PIMCORE_WEBSITE_PATH . '/var/plugins/ExportToolkit/';
-        if (!is_dir($path)) {
-            mkdir($path);
-        }
-
-        return $path . 'config.xml';
+        return Config::locateConfigFile("export-toolkit.php");
     }
 
-
+    /**
+     * get the plugin configuration.
+     *
+     * @return \Zend_Config
+     */
     public static function getPluginConfig()
     {
-        $pluginFile = self::getConfigFilePath();
+        if (self::$_pluginConfig) return self::$_pluginConfig;
 
-        if (is_null(self::$_pluginConfig)) {
-            try {
-                self::$_pluginConfig = new Zend_Config_Xml($pluginFile, 'configData');
-            } catch (Exception $e) {
-                return new Zend_Config(array());
-            }
+        $file = self::getConfigFilePath();
+
+        if (file_exists($file)) {
+            self::$_pluginConfig = new \Zend_Config(include($file));
+        } else {
+            self::$_pluginConfig = new \Zend_Config([]);
         }
+
         return self::$_pluginConfig;
     }
-
 }

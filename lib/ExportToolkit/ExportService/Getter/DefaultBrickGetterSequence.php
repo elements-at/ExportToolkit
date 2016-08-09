@@ -1,6 +1,10 @@
 <?php
 
-class ExportToolkit_ExportService_Getter_DefaultBrickGetterSequence implements ExportToolkit_ExportService_IGetter {
+namespace ExportToolkit\ExportService\Getter;
+
+use ExportToolkit\ExportService\IGetter;
+
+class DefaultBrickGetterSequence implements IGetter {
 
     public static function get($object, $config = null) {
         $sourceList = $config->source;

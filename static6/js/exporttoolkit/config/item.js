@@ -99,7 +99,7 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
                 }
 
                 if(!noTimeout && !this.tabdestroyed) {
-                    window.setTimeout(function() {
+                    this.checkTimeout = window.setTimeout(function() {
                         this.checkExporterStatus();
                     }.bind(this), 10000);
                 }
@@ -115,6 +115,12 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
 
     tabdestroy: function() {
         this.tabdestroyed = true;
+
+        this.stopChangeDetector();
+
+        if(this.checkTimeout) {
+            window.clearTimeout(this.checkTimeout);
+        }
     },
 
     startExport: function() {
@@ -351,12 +357,10 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
                     name: "attributeClusterConfig",
                     enableKeyEvents: true,
                     validator: function(value) {
-                        try {
-                            Ext.decode(value);
-                            return true;
-                        } catch(e) {
-                            return false;
-                        }
+                        if(value == '') return true;
+
+                        var json = Ext.decode(value, true);
+                        return json != null;
                     },
                     fieldLabel: t("plugin_exporttoolkit_configpanel_item_attributeClusterConfig")
                 }, this.getAttributeTable(data)
@@ -560,11 +564,8 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
         for (var i = 0; i < attributeClusters.length; i++) {
             var form = attributeClusters[i].getForm();
             var attributeClusterData = form.getFieldValues();
-            try {
-                attributeClusterData.attributeClusterConfig = Ext.decode(attributeClusterData.attributeClusterConfig);
-            } catch(e) {
-                console.log(e);
-            }
+
+            attributeClusterData.attributeClusterConfig = Ext.decode(attributeClusterData.attributeClusterConfig, true);
 
             var items = attributeClusters[i].items.getRange();
             var grid = items[items.length-1];

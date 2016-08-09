@@ -1,6 +1,6 @@
 <?php
 
-class ExportToolkit_AdminController extends Pimcore_Controller_Action_Admin {
+class ExportToolkit_AdminController extends \Pimcore\Controller\Action\Admin {
 
     protected $config;
 
@@ -12,21 +12,30 @@ class ExportToolkit_AdminController extends Pimcore_Controller_Action_Admin {
         if ($this->getRequest()->isPost()) {
             $configData = array();
 
+            $regex = '/\r\n|[\r\n]/';
+
+            if(!($blacklist = preg_split($regex, $this->getParam("blacklist")))) {
+                $blacklist = [];
+            }
+
+            if(!($classlist = preg_split($regex, $this->getParam("classlist")))) {
+                $classlist = [];
+            }
 
             $config = array(
-                'blacklist' => $this->_getParam('blacklist'),
-                'classlist' => $this->getParam("classlist"),
-                'override' => $this->getParam("override")
+                'blacklist' => array_filter($blacklist),
+                'classlist' => array_filter($classlist),
+                'override' => (boolean) $this->getParam("override")
             );
 
             $configData['classes'] = $config;
 
-            $writer = new Zend_Config_Writer_Xml(array('config' => new Zend_Config(array('configData' => $configData)),
-                'filename' => ExportToolkit_Helper::getConfigFilePath()));
-            $writer->write();
+            \Pimcore\File::putPhpFile(\ExportToolkit\Helper::getConfigFilePath(), to_php_data_file_format($configData));
+
             $this->view->saved = true;
         }
-        $this->view->config = ExportToolkit_Helper::getPluginConfig()->toArray();
+        
+        $this->view->config = \ExportToolkit\Helper::getPluginConfig()->toArray();
     }
 
 }

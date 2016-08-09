@@ -1,33 +1,93 @@
 <?php
 
 
-class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
+class ExportToolkit_ConfigController extends \Pimcore\Controller\Action\Admin {
+
+    public function upgradeAction() {
+        \ExportToolkit\Helper::upgrade();
+        exit();
+    }
+
+    private function buildFolder($path, $name)
+    {
+        return [
+            "id" => $path,
+            "text" => $name,
+            "type" => "folder",
+            "expanded" => true,
+            "iconCls" => "pimcore_icon_folder",
+            "children" => []
+        ];
+    }
+
+    private function buildItem($configuration)
+    {
+        if (\Pimcore\Tool\Admin::isExtJS6()) {
+            return [
+                "id" => $configuration->getName(),
+                "text" => $configuration->getName(),
+                "type" => "config",
+                "iconCls" => "pimcore_icon_custom_views",
+                "expandable" => false,
+                "leaf" => true
+            ];
+        } else {
+            return [
+                "id" => $configuration->getName(),
+                "text" => $configuration->getName(),
+                "type" => "config"
+            ];
+        }
+    }
 
     public function listAction() {
-        $list = ExportToolkit_Configuration::getList();
+        $folders = \ExportToolkit\Configuration\Dao::getFolders();
+        $list = \ExportToolkit\Configuration\Dao::getList();
 
-        $dataArray = array();
-        foreach($list as $config) {
-            if (\Pimcore\Tool\Admin::isExtJS6()) {
-                $dataArray[] = array("id" => $config->getName(),
-                    "text" => $config->getName(),
-                    "expandable" => false,
-                    "leaf" => true
+        $tree = [];
+        $folderStructure = [];
 
-                );
-            } else {
-                $dataArray[] = array("id" => $config->getName(), "text" => $config->getName());
+
+        // build a temporary 1 dimensional folder structure
+        foreach($folders as $folder) {
+            $folderStructure[$folder["path"]] = $this->buildFolder($folder["path"], $folder["name"]);
+
+            // root folders, keep a pointer to 1 dimensional array
+            // to minimize memory and actually make the nesting work
+            if(empty($folder["parent"])) {
+                $tree[] =& $folderStructure[$folder["path"]];
             }
         }
 
-        $this->_helper->json($dataArray);
+        // start nesting folders
+        foreach($folders as $folder) {
+            $parent = $folder["parent"];
+            $path = $folder["path"];
+
+            if(!empty($parent) && !empty($folderStructure[$parent])) {
+                $folderStructure[$parent]["children"][] =& $folderStructure[$path];
+            }
+        }
+
+        // add configurations to their corresponding folder
+        foreach($list as $configuration) {
+            $config = $this->buildItem($configuration);
+
+            if(!$configuration->getPath()) {
+                $tree[] = $config;
+            } else if(!empty($folderStructure[$configuration->getPath()])) {
+                $folderStructure[$configuration->getPath()]["children"][] = $config;
+            }
+        }
+
+        $this->_helper->json($tree);
     }
 
     public function deleteAction() {
         try {
             $name = $this->getParam("name");
 
-            $config = ExportToolkit_Configuration::getByName($name);
+            $config = \ExportToolkit\Configuration\Dao::getByName($name);
             if(empty($config)) {
                 throw new Exception("Name does not exist.");
             }
@@ -40,17 +100,64 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
         }
     }
 
+    public function addFolderAction() {
+        $parent = $this->getParam("parent");
+        $name = $this->getParam("name");
+        
+        try {
+            if (!$name) throw new \Exception("Invalid name.");
+            
+            \ExportToolkit\Configuration\Dao::addFolder($parent, $name);
 
+            $this->_helper->json(["success" => true]);
+        } catch(Exception $exception) {
+            $this->_helper->json(["success" => false, "message" => $exception->getMessage()]);
+        }
+    }
+
+    public function deleteFolderAction() {
+        $path = $this->getParam("path");
+        
+        if(\ExportToolkit\Configuration\Dao::getFolderByPath($path)) {
+            \ExportToolkit\Configuration\Dao::deleteFolder($path);
+            $this->_helper->json(["success" => true]);
+        } else {
+            $this->_helper->json(["success" => false]);
+        }
+    }
+
+    public function moveAction()
+    {
+        $who = $this->getParam("who");
+        $to = $this->getParam("to");
+
+        \ExportToolkit\Configuration\Dao::moveConfiguration($who, $to);
+
+        exit();
+    }
+
+    public function moveFolderAction()
+    {
+        $who = $this->getParam("who");
+        $to = $this->getParam("to");
+
+        \ExportToolkit\Configuration\Dao::moveFolder($who, $to);
+
+        exit();
+    }
+    
     public function addAction() {
         try {
+            $path = $this->getParam("path");
             $name = $this->getParam("name");
 
-            $config = ExportToolkit_Configuration::getByName($name);
+            $config = \ExportToolkit\Configuration\Dao::getByName($name);
+
             if(!empty($config)) {
                 throw new Exception("Name already exists.");
             }
 
-            $config = new ExportToolkit_Configuration($name);
+            $config = new \ExportToolkit\Configuration($path, $name);
             $config->save();
 
             $this->_helper->json(["success" => true, "name" => $name]);
@@ -63,16 +170,17 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
         try {
             $name = $this->getParam("name");
 
-            $config = ExportToolkit_Configuration::getByName($name);
+            $config = \ExportToolkit\Configuration\Dao::getByName($name);
             if(!empty($config)) {
                 throw new Exception("Name already exists.");
             }
 
             $originalName = $this->getParam("originalName");
-            $originalConfig = ExportToolkit_Configuration::getByName($originalName);
+            $originalConfig = \ExportToolkit\Configuration\Dao::getByName($originalName);
             if (!$originalConfig) {
                 throw new Exception("Configuration not found");
             }
+
             $originalConfig->setName($name);
             $originalConfig->save($name);
 
@@ -82,24 +190,23 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
         }
     }
 
-    protected function getCliCommand($configName){
-        return Pimcore_Tool_Console::getPhpCli() . " " . PIMCORE_DOCUMENT_ROOT.'/pimcore/cli/console.php export-toolkit:export --config-name="' . $configName.'"';
-    }
 
     public function getAction() {
         $name = $this->getParam("name");
 
-        $configuration = ExportToolkit_Configuration::getByName($name);
+        $configuration = \ExportToolkit\Configuration\Dao::getByName($name);
         if(empty($configuration)) {
             throw new Exception("Name does not exist.");
         }
 
+        $cli = Pimcore_Tool_Console::getPhpCli() . " " . realpath(PIMCORE_PLUGINS_PATH . DIRECTORY_SEPARATOR . "ExportToolkit" . DIRECTORY_SEPARATOR . "cli" . DIRECTORY_SEPARATOR . "executeExport.php"). " " . $configuration->getName();
+
         if ($configuration && $configuration->configuration->general->executor) {
-            /** @var  $className ExportToolkit_ExportService_IExecutor */
+            /** @var  $className \ExportToolkit\ExportService\IExecutor */
             $className = $configuration->configuration->general->executor;
             $cli = $className::getCli($name, null);
         } else {
-            $cli = $this->getCliCommand($configuration->getName());
+            $cli = \Pimcore\Tool\Console::getPhpCli() . " " . realpath(PIMCORE_PLUGINS_PATH . DIRECTORY_SEPARATOR . "ExportToolkit" . DIRECTORY_SEPARATOR . "cli" . DIRECTORY_SEPARATOR . "executeExport.php"). " " . $configuration->getName();
         }
 
         $this->_helper->json(
@@ -115,10 +222,10 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
 
         try {
             $data = $this->getParam("data");
-            $dataDecoded = json_decode($data);
+            $dataDecoded = json_decode($data, true);
 
-            $name = $dataDecoded->general->name;
-            $config = ExportToolkit_Configuration::getByName($name);
+            $name = $dataDecoded["general"]["name"];
+            $config = \ExportToolkit\Configuration\Dao::getByName($name);
             $config->setConfiguration($dataDecoded);
             $config->save();
 
@@ -132,7 +239,7 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
     private function loadClasses() {
 
 
-        $config = ExportToolkit_Helper::getPluginConfig()->toArray();
+        $config = \ExportToolkit\Helper::getPluginConfig()->toArray();
 
         $classmap = PIMCORE_CONFIGURATION_DIRECTORY . "/autoload-classmap.php";
 
@@ -140,8 +247,8 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
 
             $classes = array();
             $classlist = $config["classes"]["classlist"];
-            if ($classlist) {
-                foreach(preg_split("/((\r?\n)|(\r\n?))/", $classlist) as $line){
+            if (!empty($classlist)) {
+                foreach($classlist as $line){
                     if ($line) {
                         $classes[] = $line;
                     }
@@ -163,8 +270,8 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
 
 
         $additionalBlacklisted = $config["classes"]["blacklist"];
-        if ($additionalBlacklisted) {
-            foreach(preg_split("/((\r?\n)|(\r\n?))/", $additionalBlacklisted) as $line){
+        if (!empty($additionalBlacklisted)) {
+            foreach($additionalBlacklisted as $line){
                 if ($line) {
                     $blackListedClasses[] = $line;
                 }
@@ -186,12 +293,10 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
 
             $implementsIConfig = array();
             foreach($classes as $class) {
-                try {
                     $reflect = new ReflectionClass($class);
-                    if (is_subclass_of($class, "ExportToolkit_ExportService_AttributeClusterInterpreter_Abstract") && $reflect->isInstantiable()) {
+                if(is_subclass_of($class, "\\ExportToolkit\\ExportService\\AttributeClusterInterpreter\\AbstractAttributeClusterInterpreter") && $reflect->isInstantiable()) {
                         $implementsIConfig[] = array($class);
-                    }
-                } catch (Exception $e) {}
+                }
             }
 
             $this->_helper->json($implementsIConfig);
@@ -200,12 +305,10 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
 
             $implementsIConfig = array();
             foreach($classes as $class) {
-                try {
-                    $reflect = new ReflectionClass($class);
-                    if ($reflect->implementsInterface('ExportToolkit_ExportService_IFilter') && $reflect->isInstantiable()) {
-                        $implementsIConfig[] = array($class);
-                    }
-                } catch (Exception $e) {}
+                $reflect = new ReflectionClass($class);
+                if($reflect->implementsInterface('\\ExportToolkit\\ExportService\\IFilter') && $reflect->isInstantiable()) {
+                    $implementsIConfig[] = array($class);
+                }
             }
 
             $this->_helper->json($implementsIConfig);
@@ -214,12 +317,10 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
 
             $implementsIConfig = array();
             foreach($classes as $class) {
-                try {
-                    $reflect = new ReflectionClass($class);
-                    if($reflect->implementsInterface('ExportToolkit_ExportService_IConditionModificator') && $reflect->isInstantiable()) {
-                        $implementsIConfig[] = array($class);
-                    }
-                } catch (Exception $e) {}
+                $reflect = new ReflectionClass($class);
+                if($reflect->implementsInterface('\\ExportToolkit\\ExportService\\IConditionModificator') && $reflect->isInstantiable()) {
+                    $implementsIConfig[] = array($class);
+                }
             }
 
             $this->_helper->json($implementsIConfig);
@@ -228,12 +329,10 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
 
             $implementsIConfig = array();
             foreach($classes as $class) {
-                try {
-                    $reflect = new ReflectionClass($class);
-                    if ($reflect->implementsInterface('ExportToolkit_ExportService_IGetter') && $reflect->isInstantiable()) {
-                        $implementsIConfig[] = array($class);
-                    }
-                } catch (Exception $e) {}
+                $reflect = new ReflectionClass($class);
+                if($reflect->implementsInterface('\\ExportToolkit\\ExportService\\IGetter') && $reflect->isInstantiable()) {
+                    $implementsIConfig[] = array($class);
+                }
             }
 
             $this->_helper->json($implementsIConfig);
@@ -242,12 +341,10 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
 
             $implementsIConfig = array();
             foreach($classes as $class) {
-                try {
-                    $reflect = new ReflectionClass($class);
-                    if ($reflect->implementsInterface('ExportToolkit_ExportService_IInterpreter') && $reflect->isInstantiable()) {
-                        $implementsIConfig[] = array($class);
-                    }
-                } catch (Exception $e) {}
+                $reflect = new ReflectionClass($class);
+                if($reflect->implementsInterface('\\ExportToolkit\\ExportService\\IInterpreter') && $reflect->isInstantiable()) {
+                    $implementsIConfig[] = array($class);
+                }
             }
 
             $this->_helper->json($implementsIConfig);
@@ -257,23 +354,14 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
         }
 
     }
-
-
-    public function clearCacheAction() {
-
-        Pimcore_Model_Cache::clearTag("exporttoolkit");
-        exit;
-
-    }
-
-
+    
     public function executeExportAction() {
 
         $workername = $this->getParam("name");
-        $config = ExportToolkit_Configuration::getByName($workername);
+        $config = \ExportToolkit\Configuration\Dao::getByName($workername);
 
         if ($config && $config->configuration->general->executor) {
-            /** @var  $className ExportToolkit_ExportService_IExecutor */
+            /** @var  $className \ExportToolkit\ExportService\IExecutor */
             $className = $config->configuration->general->executor;
             try {
                 $className::execute($workername, null);
@@ -282,12 +370,13 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
             }
         } else {
             $lockkey = "exporttoolkit_" . $workername;
-            if (Tool_Lock::isLocked($lockkey, 3 * 60 * 60)) { //lock for 3h
+            if (\Pimcore\Model\Tool\Lock::isLocked($lockkey, 3 * 60 * 60)) { //lock for 3h
                 $this->_helper->json(["success" => false]);
             }
-            $cmd = $this->getCliCommand($workername);
+
+            $cmd = \Pimcore\Tool\Console::getPhpCli() . " " . realpath(PIMCORE_PLUGINS_PATH . DIRECTORY_SEPARATOR . "ExportToolkit" . DIRECTORY_SEPARATOR . "cli" . DIRECTORY_SEPARATOR . "executeExport.php") . " " . $workername;
             Logger::info($cmd);
-            Pimcore_Tool_Console::execInBackground($cmd, PIMCORE_LOG_DIRECTORY . DIRECTORY_SEPARATOR . "exporttoolkit-output.log");
+            \Pimcore\Tool\Console::execInBackground($cmd, PIMCORE_LOG_DIRECTORY . DIRECTORY_SEPARATOR . "exporttoolkit-output.log");
         }
 
         $this->_helper->json(["success" => true]);
@@ -298,7 +387,7 @@ class ExportToolkit_ConfigController extends Pimcore_Controller_Action_Admin {
         $workername = $this->getParam("name");
         $lockkey = "exporttoolkit_" . $workername;
 
-        if(Tool_Lock::isLocked($lockkey, 3 * 60 * 60)) { //lock for 3h
+        if(\Pimcore\Model\Tool\Lock::isLocked($lockkey, 3 * 60 * 60)) { //lock for 3h
             $this->_helper->json(["success" => true, "locked" => true]);
         } else {
             $this->_helper->json(["success" => true, "locked" => false]);

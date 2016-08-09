@@ -1,8 +1,11 @@
 <?php
 
+namespace ExportToolkit\ExportService\AttributeClusterInterpreter;
+
+use Pimcore\Model\Object\AbstractObject;
 use \Pimcore\Tool\SimpleXMLExtended;
 
-class ExportToolkit_ExportService_AttributeClusterInterpreter_DefaultXml extends ExportToolkit_ExportService_AttributeClusterInterpreter_Abstract {
+class DefaultXml extends AbstractAttributeClusterInterpreter {
 
     protected $firstData = true;
 
@@ -17,7 +20,7 @@ class ExportToolkit_ExportService_AttributeClusterInterpreter_DefaultXml extends
     }
 
 
-    public function commitDataRow(Object_Abstract $object) {
+    public function commitDataRow(AbstractObject $object) {
     }
 
 
@@ -26,7 +29,7 @@ class ExportToolkit_ExportService_AttributeClusterInterpreter_DefaultXml extends
         file_put_contents($this->getExportFile(), $xml);
     }
 
-    public function deleteFromExport(Object_Abstract $object) {
+    public function deleteFromExport(AbstractObject $object) {
         // nothing to do here
     }
 

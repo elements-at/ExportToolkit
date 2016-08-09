@@ -6,13 +6,18 @@
  * Time: 10:56
  */
 
-class ExportToolkit_ExportService_Interpreter_KeyValueToString implements ExportToolkit_ExportService_IInterpreter {
+namespace ExportToolkit\ExportService\Interpreter;
+
+use ExportToolkit\ExportService\IInterpreter;
+use Pimcore\Model\Object\Data\KeyValue;
+
+class KeyValueToString implements IInterpreter {
 
     public static function interpret($value, $config = null)
     {
         $result = "";
 
-        if($value instanceof Object_Data_KeyValue) {
+        if($value instanceof KeyValue) {
 
             foreach($value->getProperties() as $prop) {
                 $result.="|id=".$prop['id']."&key=".$prop['key']."&value=".$prop['value']."";
