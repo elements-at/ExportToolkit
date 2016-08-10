@@ -26,7 +26,7 @@ class Dao extends AbstractDao
         $name = $this->model->getName();
         $config =& self::getConfig();
 
-        $config["list"][$name] = $this->model->getConfiguration();
+        $config["list"][$name] = json_decode(json_encode($this->model->getConfiguration()), true);
 
         self::writeConfig($config);
     }
@@ -215,7 +215,7 @@ class Dao extends AbstractDao
         $configurations = [];
 
         foreach ($config["list"] as $item) {
-            $configurations[] = new Configuration($item["general"]["path"], $item["general"]["name"], $item);
+            $configurations[] = new Configuration($item["general"]["path"], $item["general"]["name"], json_decode(json_encode($item)));
         }
 
         return $configurations;

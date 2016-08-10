@@ -293,10 +293,12 @@ class ExportToolkit_ConfigController extends \Pimcore\Controller\Action\Admin {
 
             $implementsIConfig = array();
             foreach($classes as $class) {
+                try {
                     $reflect = new ReflectionClass($class);
-                if(is_subclass_of($class, "\\ExportToolkit\\ExportService\\AttributeClusterInterpreter\\AbstractAttributeClusterInterpreter") && $reflect->isInstantiable()) {
+                    if (is_subclass_of($class, "\\ExportToolkit\\ExportService\\AttributeClusterInterpreter\\AbstractAttributeClusterInterpreter") && $reflect->isInstantiable()) {
                         $implementsIConfig[] = array($class);
-                }
+                    }
+                } catch (Exception $e) {}
             }
 
             $this->_helper->json($implementsIConfig);
@@ -305,10 +307,12 @@ class ExportToolkit_ConfigController extends \Pimcore\Controller\Action\Admin {
 
             $implementsIConfig = array();
             foreach($classes as $class) {
-                $reflect = new ReflectionClass($class);
-                if($reflect->implementsInterface('\\ExportToolkit\\ExportService\\IFilter') && $reflect->isInstantiable()) {
-                    $implementsIConfig[] = array($class);
-                }
+                try {
+                    $reflect = new ReflectionClass($class);
+                    if ($reflect->implementsInterface('\\ExportToolkit\\ExportService\\IFilter') && $reflect->isInstantiable()) {
+                        $implementsIConfig[] = array($class);
+                    }
+                } catch (Exception $e) {}
             }
 
             $this->_helper->json($implementsIConfig);
@@ -317,10 +321,12 @@ class ExportToolkit_ConfigController extends \Pimcore\Controller\Action\Admin {
 
             $implementsIConfig = array();
             foreach($classes as $class) {
-                $reflect = new ReflectionClass($class);
-                if($reflect->implementsInterface('\\ExportToolkit\\ExportService\\IConditionModificator') && $reflect->isInstantiable()) {
-                    $implementsIConfig[] = array($class);
-                }
+                try {
+                    $reflect = new ReflectionClass($class);
+                    if($reflect->implementsInterface('\\ExportToolkit\\ExportService\\IConditionModificator') && $reflect->isInstantiable()) {
+                        $implementsIConfig[] = array($class);
+                    }
+                } catch (Exception $e) {}
             }
 
             $this->_helper->json($implementsIConfig);
@@ -329,10 +335,12 @@ class ExportToolkit_ConfigController extends \Pimcore\Controller\Action\Admin {
 
             $implementsIConfig = array();
             foreach($classes as $class) {
-                $reflect = new ReflectionClass($class);
-                if($reflect->implementsInterface('\\ExportToolkit\\ExportService\\IGetter') && $reflect->isInstantiable()) {
-                    $implementsIConfig[] = array($class);
-                }
+                try {
+                    $reflect = new ReflectionClass($class);
+                    if ($reflect->implementsInterface('\\ExportToolkit\\ExportService\\IGetter') && $reflect->isInstantiable()) {
+                        $implementsIConfig[] = array($class);
+                    }
+                } catch (Exception $e) {}
             }
 
             $this->_helper->json($implementsIConfig);
@@ -341,10 +349,12 @@ class ExportToolkit_ConfigController extends \Pimcore\Controller\Action\Admin {
 
             $implementsIConfig = array();
             foreach($classes as $class) {
-                $reflect = new ReflectionClass($class);
-                if($reflect->implementsInterface('\\ExportToolkit\\ExportService\\IInterpreter') && $reflect->isInstantiable()) {
-                    $implementsIConfig[] = array($class);
-                }
+                try {
+                    $reflect = new ReflectionClass($class);
+                    if ($reflect->implementsInterface('\\ExportToolkit\\ExportService\\IInterpreter') && $reflect->isInstantiable()) {
+                        $implementsIConfig[] = array($class);
+                    }
+                } catch (Exception $e) {}
             }
 
             $this->_helper->json($implementsIConfig);
@@ -353,6 +363,10 @@ class ExportToolkit_ConfigController extends \Pimcore\Controller\Action\Admin {
             throw new Exception("unknown class type");
         }
 
+    }
+
+    protected function getCliCommand($configName){
+        return \Pimcore\Tool\Console::getPhpCli() . " " . PIMCORE_DOCUMENT_ROOT.'/pimcore/cli/console.php export-toolkit:export --config-name="' . $configName.'"';
     }
     
     public function executeExportAction() {
@@ -374,7 +388,7 @@ class ExportToolkit_ConfigController extends \Pimcore\Controller\Action\Admin {
                 $this->_helper->json(["success" => false]);
             }
 
-            $cmd = \Pimcore\Tool\Console::getPhpCli() . " " . realpath(PIMCORE_PLUGINS_PATH . DIRECTORY_SEPARATOR . "ExportToolkit" . DIRECTORY_SEPARATOR . "cli" . DIRECTORY_SEPARATOR . "executeExport.php") . " " . $workername;
+            $cmd = $this->getCliCommand($workername);
             Logger::info($cmd);
             \Pimcore\Tool\Console::execInBackground($cmd, PIMCORE_LOG_DIRECTORY . DIRECTORY_SEPARATOR . "exporttoolkit-output.log");
         }

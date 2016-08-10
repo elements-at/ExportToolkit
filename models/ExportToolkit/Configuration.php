@@ -21,6 +21,9 @@ class Configuration extends AbstractModel {
      */
     public function setConfiguration($configuration)
     {
+        if(is_array($configuration)) {
+            $configuration = json_decode(json_encode($configuration));
+        }
         $this->configuration = $configuration;
     }
 
@@ -64,16 +67,16 @@ class Configuration extends AbstractModel {
 
     public function save() {
         if(empty($this->configuration)) {
-            $this->configuration = [];
-            $this->configuration["general"] = [];
+            $this->configuration = new \stdClass();
+            $this->configuration->general = new \stdClass();
         }
         
         if(empty($this->getPath())) {
             $this->setPath(null);
         }
 
-        $this->configuration["general"]["path"] = $this->path;
-        $this->configuration["general"]["name"] = $this->name;
+        $this->configuration->general->path = $this->path;
+        $this->configuration->general->name = $this->name;
         $this->getDao()->save();
     }
 

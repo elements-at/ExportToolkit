@@ -5,6 +5,7 @@ namespace ExportToolkit\ExportService;
 use ExportToolkit\Configuration;
 use ExportToolkit\ExportService\AttributeClusterInterpreter\AbstractAttributeClusterInterpreter;
 use ExportToolkit\ExportService\Filter\DefaultFilter;
+use Pimcore\Log\Simple;
 use Pimcore\Model\Object\AbstractObject;
 use Pimcore\Model\Object\Localizedfield;
 
@@ -30,8 +31,9 @@ class Worker {
 
     public function __construct(Configuration $workerConfig) {
         $this->workerConfig = $workerConfig;
-
+        
         $classId = trim($workerConfig->getConfiguration()->general->pimcoreClass);
+
         if ($classId) {
             $class = \Pimcore\Model\Object\ClassDefinition::getById($classId);
             $this->pimcoreClass = trim("Object_" . ucfirst($class->getName()));
@@ -186,7 +188,7 @@ class Worker {
     }
 
     /**
-     * @return Object_List_Concrete
+     * @return \Pimcore\Model\Object\Listing\Concrete
      */
     public function getObjectList() {
         if ($this->pimcoreClass == "Object_Abstract") {
@@ -196,18 +198,18 @@ class Worker {
         }
 
         /**
-         * @var $objects Object_List_Concrete
+         * @var $objects \Pimcore\Model\Object\Listing\Concrete
          */
         $objects = new $listClassName();
         $objects->setUnpublished(true);
         $objects->setObjectTypes(array("object", "folder", "variant"));
         if($this->workerConfig->getConfiguration()->general->queryLanguage) {
             $objects->setLocale($this->workerConfig->getConfiguration()->general->queryLanguage);
-            if ($objects instanceof Object_List_Concrete) {
+            if ($objects instanceof \Pimcore\Model\Object\Listing\Concrete) {
                 $objects->setIgnoreLocalizedFields(false);
             }
         } else {
-            if ($objects instanceof Object_List_Concrete) {
+            if ($objects instanceof \Pimcore\Model\Object\Listing\Concrete) {
                 $objects->setIgnoreLocalizedFields(true);
             }
         }
@@ -232,7 +234,7 @@ class Worker {
 
     }
 
-    public function checkObjectInCondition(Object_Abstract $object) {
+    public function checkObjectInCondition(AbstractObject $object) {
         if($this->workerConfig->getConfiguration()->general->sqlCondition) {
 
             $list = $this->getObjectList();

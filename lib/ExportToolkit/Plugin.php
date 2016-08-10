@@ -2,10 +2,21 @@
 
 namespace ExportToolkit;
 
+use Pimcore\File;
+
 class Plugin extends \Pimcore\API\Plugin\AbstractPlugin implements \Pimcore\API\Plugin\PluginInterface {
 
     protected $exportService;
 
+    public function init(){
+        parent::init();
+        \Pimcore::getEventManager()->attach('system.console.init', function (\Zend_EventManager_Event $e) {
+            $application = $e->getTarget();
+
+            $application->add(new \ExportToolkit\Console\Command\ExportCommand());
+        });
+    }
+    
     public function __construct($jsPaths = null, $cssPaths = null) {
         parent::__construct($jsPaths, $cssPaths);
     }
@@ -19,7 +30,16 @@ class Plugin extends \Pimcore\API\Plugin\AbstractPlugin implements \Pimcore\API\
 
 
     public static function install (){
-        // implement your own logic here
+        // create backend permission
+        \Pimcore\Model\User\Permission\Definition::create("plugin_exporttoolkit_config");
+
+        // create default config if non exists yet
+        if(!file_exists(Helper::getConfigFilePath())) {
+            $defaultConfig = include(PIMCORE_PLUGINS_PATH . "/ExportToolkit/install/example-config.php");
+
+            File::putPhpFile(Helper::getConfigFilePath(), to_php_data_file_format($defaultConfig));
+        }
+
         return true;
     }
 
@@ -29,8 +49,7 @@ class Plugin extends \Pimcore\API\Plugin\AbstractPlugin implements \Pimcore\API\
     }
 
     public static function isInstalled () {
-        // implement your own logic here
-        return true;
+        return file_exists(Helper::getConfigFilePath());
     }
 
 

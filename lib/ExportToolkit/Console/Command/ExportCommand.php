@@ -51,7 +51,7 @@ class ExportCommand extends AbstractCommand
         }
 
         $this->initProcessManager($input->getOption('monitoring-item-id'),["autoCreate" => true,"name" => $input->getOption('config-name')]);
-        $service = new \ExportToolkit_ExportService();
+        $service = new \ExportToolkit\ExportService();
         $service->executeExport($input->getOption('config-name'));
 
         if(!$monitoringItemId){
