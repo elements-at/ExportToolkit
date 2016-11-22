@@ -1,33 +1,35 @@
-var ExportToolkit = pimcore.registerNS("pimcore.plugin.ExportToolkit.ConfigPanel");
+pimcore.registerNS("pimcore.plugin.exporttoolkit.config.ConfigPanel");
+pimcore.plugin.exporttoolkit.config.ConfigPanel = Class.create({
 
-ExportToolkit.ConfigPanel = Class.create({
     initialize: function () {
+
         this.getTabPanel();
     },
 
     activate: function () {
-        Ext.getCmp("pimcore_panel_tabs").setActiveItem(this.getTabPanel());
+        var tabPanel = Ext.getCmp("pimcore_panel_tabs");
+        tabPanel.activate("plugin_exporttoolkit_configpanel");
     },
 
     getTabPanel: function () {
+
         if (!this.panel) {
             this.panel = new Ext.Panel({
+                id: "plugin_exporttoolkit_configpanel",
                 title: t("plugin_exporttoolkit_configpanel"),
-                iconCls: "pimcore_icon_custom_views",
+                iconCls: "plugin_exporttoolkit_configpanel",
                 border: false,
                 layout: "border",
-                closable: true,
-                items: [
-                    this.getTree(),
-                    this.getEditPanel()
-                ]
+                closable:true,
+                items: [this.getTree(), this.getEditPanel()]
             });
 
-            Ext.getCmp("pimcore_panel_tabs").add(this.panel);
-            this.activate();
+            var tabPanel = Ext.getCmp("pimcore_panel_tabs");
+            tabPanel.add(this.panel);
+            tabPanel.setActiveItem("plugin_exporttoolkit_configpanel");
 
             this.panel.on("destroy", function () {
-                pimcore.globalmanager.remove(ExportToolkit.config.PLUGIN_PANEL_KEY);
+                pimcore.globalmanager.remove("plugin_exporttoolkit_configpanel");
             }.bind(this));
 
             pimcore.layout.refresh();
@@ -38,52 +40,53 @@ ExportToolkit.ConfigPanel = Class.create({
 
     getTree: function () {
         if (!this.tree) {
+
             var store = Ext.create('Ext.data.TreeStore', {
+                autoLoad: false,
+                autoSync: true,
                 proxy: {
                     type: 'ajax',
                     url: '/plugin/ExportToolkit/config/list',
                     reader: {
                         type: 'json'
                     }
-                },
-                root: {
-                    text: t("plugin_exporttoolkit_configpanel"),
-                    iconCls: 'pimcore_icon_folder',
-                    expanded: true,
-                    type: ExportToolkit.config.TreeType.FOLDER
                 }
             });
 
-            this.tree = Ext.create('Ext.tree.Panel', {
+            this.tree = new Ext.tree.TreePanel({
+                id: "plugin_exporttoolkit_configpanel_tree",
                 store: store,
                 region: "west",
-                scrollable: true,
+                useArrows:true,
+                autoScroll:true,
+                animate:true,
+                containerScroll: true,
                 border: true,
                 width: 200,
-                rootVisible: true,
-                viewConfig: {
-                    xtype: 'pimcoretreeview',
-                    plugins: {
-                        ptype: 'treeviewdragdrop',
-                        appendOnly: false,
-                        ddGroup: 'elements',
-                        scrollable: true
-                    },
-                    listeners: {
-                        nodedragover: this.onTreeNodeOver.bind(this)
-                    }
+                split: true,
+                root: {
+                    //nodeType: 'async',
+                    id: '0',
+                    expanded: true,
+                    iconCls: "pimcore_icon_thumbnails"
+
                 },
+                rootVisible: false,
                 tbar: {
-                    items: [{
-                        text: t("plugin_exporttoolkit_configpanel_add"),
-                        iconCls: "pimcore_icon_add",
-                        handler: this.addField.bind(this, null)
-                    }]
+                    items: [
+                        {
+                            text: t("plugin_exporttoolkit_configpanel_add"),
+                            iconCls: "pimcore_icon_add",
+                            handler: this.addField.bind(this)
+                        }
+                    ]
                 },
                 listeners: {
-                    itemclick: this.onTreeNodeClick.bind(this),
+                    itemclick : this.onTreeNodeClick.bind(this),
                     itemcontextmenu: this.onTreeNodeContextmenu.bind(this),
-                    itemmove: this.onTreeNodeMove.bind(this)
+                    render: function() {
+                        this.getRootNode().expand()
+                    }
                 }
             });
         }
@@ -93,7 +96,7 @@ ExportToolkit.ConfigPanel = Class.create({
 
     getEditPanel: function () {
         if (!this.editPanel) {
-            this.editPanel = Ext.create('Ext.tab.Panel', {
+            this.editPanel = new Ext.TabPanel({
                 region: "center"
             });
         }
@@ -101,58 +104,22 @@ ExportToolkit.ConfigPanel = Class.create({
         return this.editPanel;
     },
 
-    onTreeNodeOver: function (targetNode, position) {
-        // only appending to folders is allowed, ignore before and after
-        if (position != "append" || targetNode.data.type != ExportToolkit.config.TreeType.FOLDER) return false;
+    getTreeNodeListeners: function () {
+        var treeNodeListeners = {
+            'click' : this.onTreeNodeClick.bind(this),
+            "contextmenu": this.onTreeNodeContextmenu
+        };
 
-        return true;
+        return treeNodeListeners;
     },
 
-    reloadTree: function () {
-        this.tree.getStore().load({
-            node: this.tree.getRootNode()
-        });
-    },
-
-    isRootNode: function (node) {
-        return node == this.tree.getRootNode();
-    },
-
-    getNodeId: function (node) {
-        return (node == this.tree.getRootNode() || !node ? null : node.data.id);
-    },
-
-    onTreeNodeMove: function (node, oldParent, newParent, index) {
-        var url = '/plugin/ExportToolkit/config/move';
-
-        if (node.data.type == ExportToolkit.config.TreeType.FOLDER) {
-            url = '/plugin/ExportToolkit/config/move-folder'
-        }
-
-        var to = this.getNodeId(newParent);
-
-        Ext.Ajax.request({
-            url: url,
-            params: {
-                who: node.data.id,
-                to: to
-            },
-            success: function () {
-                this.reloadTree();
-            }.bind(this)
-        });
-    },
-
-    onTreeNodeClick: function (tree, record, item, index, e, eOpts) {
-        if (record.data.type == ExportToolkit.config.TreeType.FOLDER) return;
-
+    onTreeNodeClick: function (tree, record, item, index, e, eOpts ) {
         this.openConfig(record.id);
     },
 
-    openConfig: function (id) {
-        var existingPanel = Ext.getCmp(ExportToolkit.config.ITEM_PANEL_PREFIX + id);
-
-        if (existingPanel) {
+    openConfig: function(id) {
+        var existingPanel = Ext.getCmp("plugin_exporttoolkit_configpanel_panel_" + id);
+        if(existingPanel) {
             this.editPanel.setActiveTab(existingPanel);
             return;
         }
@@ -166,218 +133,122 @@ ExportToolkit.ConfigPanel = Class.create({
                 var data = Ext.decode(response.responseText);
 
                 var fieldPanel = new pimcore.plugin.exporttoolkit.config.Item(data, this);
+                pimcore.layout.refresh();
             }.bind(this)
         });
     },
 
-    onTreeNodeContextmenu: function (view, node, item, index, event) {
-        event.stopEvent();
+    onTreeNodeContextmenu: function (tree, record, item, index, e, eOpts ) {
+        e.stopEvent();
 
-        view.select();
+        tree.select();
 
         var menu = new Ext.menu.Menu();
+        menu.add(new Ext.menu.Item({
+            text: t('delete'),
+            iconCls: "pimcore_icon_delete",
+            handler: this.deleteField.bind(this, tree, record)
+        }));
 
-        if (node.data.type == ExportToolkit.config.TreeType.FOLDER) {
-            menu.add(new Ext.menu.Item({
-                text: t('add_folder'),
-                iconCls: "pimcore_icon_folder pimcore_icon_overlay_add",
-                handler: this.addFolder.bind(this, node)
-            }));
+        menu.add(new Ext.menu.Item({
+            text: t('duplicate'),
+            iconCls: "pimcore_icon_clone",
+            handler: this.cloneField.bind(this, tree, record)
+        }));
 
-            menu.add(new Ext.menu.Item({
-                text: t("plugin_exporttoolkit_configpanel_add"),
-                iconCls: "pimcore_icon_add",
-                handler: this.addField.bind(this, node)
-            }));
-
-            if (!this.isRootNode(node)) {
-                menu.add(new Ext.menu.Item({
-                    text: t('delete'),
-                    iconCls: "pimcore_icon_delete",
-                    handler: this.deleteFolder.bind(this, node)
-                }));
-            }
-        } else {
-            menu.add(new Ext.menu.Item({
-                text: t('duplicate'),
-                iconCls: "pimcore_icon_clone",
-                handler: this.cloneField.bind(this, node)
-            }));
-
-            menu.add(new Ext.menu.Item({
-                text: t('delete'),
-                iconCls: "pimcore_icon_delete",
-                handler: this.deleteField.bind(this, node)
-            }));
-        }
-
-        menu.showAt(event.pageX, event.pageY);
+        menu.showAt(e.pageX, e.pageY);
     },
 
-    addField: function (node) {
-        Ext.MessageBox.prompt(
-            t('plugin_exporttoolkit_configpanel_enterkey_title'),
-            t('plugin_exporttoolkit_configpanel_enterkey_prompt'),
-            this.addFieldComplete.bind(this, node),
-            null,
-            null,
-            ""
-        );
+    addField: function () {
+        Ext.MessageBox.prompt(t('plugin_exporttoolkit_configpanel_enterkey_title'), t('plugin_exporttoolkit_configpanel_enterkey_prompt'), this.addFieldComplete.bind(this), null, null, "");
     },
 
-    isValidName: function (name) {
-        var result = name.match(ExportToolkit.config.NAME_REGEX);
+    addFieldComplete: function (button, value, object) {
 
-        return name == result && name.length > 2;
-    },
-
-    addFieldComplete: function (node, button, value) {
-        var path = this.getNodeId(node);
-
-        if (button == ExportToolkit.config.CANCEL) return;
-
-        if (this.isValidName(value)) {
+        var regresult = value.match(/[a-zA-Z0-9_\-]+/);
+        if (button == "ok" && value.length > 2 && regresult == value) {
             Ext.Ajax.request({
                 url: "/plugin/ExportToolkit/config/add",
                 params: {
-                    path: path,
                     name: value
                 },
                 success: function (response) {
                     var data = Ext.decode(response.responseText);
 
-                    this.reloadTree();
+                    this.tree.getStore().load({
+                        node: this.tree.getRootNode()
+                    });
 
-                    if (!data || !data.success) {
+                    if(!data || !data.success) {
                         pimcore.helpers.showNotification(t("error"), t("plugin_exporttoolkit_configpanel_error_adding_config"), "error", data.message);
                     } else {
                         this.openConfig(data.name);
                     }
+
                 }.bind(this)
             });
-        } else {
+        }
+        else if (button == "cancel") {
+            return;
+        }
+        else {
             Ext.Msg.alert(t("plugin_exporttoolkit_configpanel"), t("plugin_exporttoolkit_configpanel_invalid_name"));
         }
     },
 
-    deleteField: function (node) {
-        if (this.isRootNode(node)) return;
+    cloneFieldComplete: function (tree, record, button, value, object) {
 
-        Ext.Msg.confirm(t('delete'), t('delete_message'), function (btn) {
-            if (btn == ExportToolkit.config.YES) {
-                Ext.Ajax.request({
-                    url: "/plugin/ExportToolkit/config/delete",
-                    params: {
-                        name: this.getNodeId(node)
-                    }
-                });
-
-                this.getEditPanel().removeAll();
-                node.remove();
-            }
-        }.bind(this));
-    },
-
-    addFolder: function (record) {
-        Ext.MessageBox.prompt(
-            t('plugin_exporttoolkit_configpanel_enterkey_title'),
-            t('plugin_exporttoolkit_configpanel_enterkey_prompt'),
-            this.addFolderComplete.bind(this, record),
-            null,
-            null,
-            ""
-        );
-    },
-
-    addFolderComplete: function (node, button, value) {
-        if (button == ExportToolkit.config.OK && this.isValidName(value)) {
-            Ext.Ajax.request({
-                url: "/plugin/ExportToolkit/config/add-folder",
-                params: {
-                    parent: this.getNodeId(node),
-                    name: value
-                },
-                success: function (response) {
-                    var data = Ext.decode(response.responseText);
-
-                    if (!data || !data.success) {
-                        pimcore.helpers.showNotification(
-                            t("error"),
-                            t("plugin_exporttoolkit_configpanel_error_adding_config"),
-                            "error",
-                            data.message
-                        );
-                    } else {
-                        this.reloadTree();
-                    }
-                }.bind(this)
-            });
-        }
-    },
-
-    deleteFolder: function (node) {
-        if (this.isRootNode(node)) return;
-
-        Ext.Msg.confirm(
-            t('delete'),
-            t('delete_message'),
-            function (btn) {
-                if (btn == ExportToolkit.config.YES) {
-                    Ext.Ajax.request({
-                        url: "/plugin/ExportToolkit/config/delete-folder",
-                        params: {
-                            path: this.getNodeId(node)
-                        }, success: function (response) {
-                            var data = Ext.decode(response.responseText);
-
-                            if (data && data.success) {
-                                this.getEditPanel().removeAll();
-                                node.remove();
-                            }
-                        }.bind(this)
-                    });
-                }
-            }.bind(this));
-    },
-
-    cloneField: function (node) {
-        if (node.data.type != ExportToolkit.config.TreeType.CONFIGURATION) return;
-
-        Ext.MessageBox.prompt(
-            t('plugin_exporttoolkit_configpanel_enterclonekey_title'),
-            t('plugin_exporttoolkit_configpanel_enterclonekey_prompt'),
-            this.cloneFieldComplete.bind(this, node),
-            null,
-            null,
-            ""
-        );
-    },
-
-    cloneFieldComplete: function (node, button, value) {
-        if (button == ExportToolkit.config.CANCEL) return;
-
-        if (button == ExportToolkit.config.OK && this.isValidName(value)) {
+        var regresult = value.match(/[a-zA-Z0-9_\-]+/);
+        if (button == "ok" && value.length > 2 && regresult == value) {
             Ext.Ajax.request({
                 url: "/plugin/ExportToolkit/config/clone",
                 params: {
                     name: value,
-                    originalName: this.getNodeId(node)
+                    originalName: record.data.id
                 },
                 success: function (response) {
                     var data = Ext.decode(response.responseText);
 
-                    this.reloadTree();
+                    this.tree.getStore().load({
+                        node: this.tree.getRootNode()
+                    });
 
-                    if (!data || !data.success) {
+                    if(!data || !data.success) {
                         pimcore.helpers.showNotification(t("error"), t("plugin_exporttoolkit_configpanel_error_cloning_config"), "error", data.message);
                     } else {
-                        this.openConfig(data.name);
+                        this.openConfig(data.name, tree, record);
                     }
+
                 }.bind(this)
             });
-        } else {
+        }
+        else if (button == "cancel") {
+            return;
+        }
+        else {
             Ext.Msg.alert(t("plugin_exporttoolkit_configpanel"), t("plugin_exporttoolkit_configpanel_invalid_name"));
         }
+    },
+
+    cloneField: function (tree, record) {
+        Ext.MessageBox.prompt(t('plugin_exporttoolkit_configpanel_enterclonekey_title'), t('plugin_exporttoolkit_configpanel_enterclonekey_prompt'),
+            this.cloneFieldComplete.bind(this, tree, record), null, null, "");
+    },
+
+    deleteField: function (tree, record) {
+        Ext.Msg.confirm(t('delete'), t('delete_message'), function(btn){
+            if (btn == 'yes'){
+                Ext.Ajax.request({
+                    url: "/plugin/ExportToolkit/config/delete",
+                    params: {
+                        name: record.data.id
+                    }
+                });
+
+                this.getEditPanel().removeAll();
+                record.remove();
+            }
+        }.bind(this));
     }
 });
 
