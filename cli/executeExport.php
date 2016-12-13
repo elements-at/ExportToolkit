@@ -11,7 +11,7 @@ chdir($workingDirectory);
 $lockkey = "exporttoolkit_" . $argv[1];
 Tool_Lock::acquire($lockkey);
 
-$service = new ExportToolkit_ExportService();
+$service = new \ExportToolkit\ExportService();
 $service->executeExport($argv[1]);
 
 
