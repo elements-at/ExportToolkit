@@ -198,7 +198,7 @@ class Worker {
         }
 
         /**
-         * @var $objects \Pimcore\Model\Object\Listing\Concrete
+         * @var $objects \Pimcore\Model\Object\Listing\Concrete|\Pimcore\Model\Object\Listing\Dao
          */
         $objects = new $listClassName();
         $objects->setUnpublished(true);
@@ -224,8 +224,20 @@ class Worker {
         $condition = $this->workerConfig->getConfiguration()->general->sqlCondition;
         if ($this->workerConfig->configuration->general->conditionModificator) {
             $conditionModificator = $this->workerConfig->configuration->general->conditionModificator;
-            $condition = $conditionModificator::modify($this->workerConfig->name, $condition);
 
+            if (class_exists($conditionModificator)) {
+                $conditionModificatorReflector = new \ReflectionClass($conditionModificator);
+
+                // support modifying the list (e.g. add joins)
+                if ($conditionModificatorReflector->implementsInterface(IListModificator::class)) {
+                    $conditionModificator::modifyList($this->workerConfig->name, $objects);
+                }
+
+                // modify condition string
+                if ($conditionModificatorReflector->implementsInterface(IConditionModificator::class)) {
+                    $condition = $conditionModificator::modify($this->workerConfig->name, $condition);
+                }
+            }
         }
 
         $objects->setCondition($condition);
