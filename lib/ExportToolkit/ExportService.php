@@ -98,6 +98,10 @@ class ExportService {
         $count = $pageSize;
 
         $totalObjectCount = $worker->getObjectList()->count();
+        if ($pageSize > $totalObjectCount) {
+            $pageSize = $totalObjectCount;
+        }
+
         $this->setUpExport(false);
 
 
