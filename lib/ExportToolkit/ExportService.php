@@ -121,9 +121,9 @@ class ExportService {
             $items = $objects->load();
             $monitoringItem->setCurrentWorkload(($offset) ?:1 )->setDefaultProcessMessage($items[0] ? $items[0]->getClassName() : 'Items')->save();
             foreach($items as $object) {
-                Simple::log("export-toolkit-" . $workerName, "Updating product " . $object->getId());
+                Simple::log("export-toolkit-" . $workerName, "Updating object " . $object->getId());
 
-                $monitoringItem->getLogger()->debug("Updating product " . $object->getId());
+                $monitoringItem->getLogger()->debug("Updating object " . $object->getId());
 
                 if($worker->checkClass($object)) {
                     $worker->updateExport($object);
