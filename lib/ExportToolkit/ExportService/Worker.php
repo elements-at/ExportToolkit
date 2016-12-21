@@ -5,11 +5,16 @@ namespace ExportToolkit\ExportService;
 use ExportToolkit\Configuration;
 use ExportToolkit\ExportService\AttributeClusterInterpreter\AbstractAttributeClusterInterpreter;
 use ExportToolkit\ExportService\Filter\DefaultFilter;
-use Pimcore\Log\Simple;
+use ExportToolkit\Traits\LoggerAwareTrait;
+use Pimcore\Log\ApplicationLogger;
 use Pimcore\Model\Object\AbstractObject;
 use Pimcore\Model\Object\Localizedfield;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 class Worker {
+
+    use LoggerAwareTrait;
 
     /**
      * @var Configuration
@@ -31,6 +36,9 @@ class Worker {
 
     public function __construct(Configuration $workerConfig) {
         $this->workerConfig = $workerConfig;
+
+        // add a default logger implementation so we can rely on a logger being set
+        $this->logger = new NullLogger();
         
         $classId = trim($workerConfig->getConfiguration()->general->pimcoreClass);
 
@@ -63,6 +71,20 @@ class Worker {
                     throw new \Exception("Cluster interpreter class " . $attributeCluster->clusterInterpreterClass . " not found.");
                 }
             }
+        }
+    }
+
+    /**
+     * @param ApplicationLogger|LoggerInterface $logger
+     * @return $this
+     */
+    public function setLogger($logger)
+    {
+        $this->logger = $logger;
+
+        // update logger in interpreters
+        foreach ($this->clusterInterpreters as $clusterInterpreter) {
+            $clusterInterpreter->setLogger($logger);
         }
     }
 

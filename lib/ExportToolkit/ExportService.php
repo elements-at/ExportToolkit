@@ -84,6 +84,8 @@ class ExportService {
         $monitoringItem = $this->getMonitoringItem();
         $monitoringItem->getLogger()->info("export-toolkit-" . $workerName);
 
+        $worker->setLogger($monitoringItem->getLogger());
+
         Simple::log("export-toolkit-" . $workerName, "");
 
         //step 1 - setting up export

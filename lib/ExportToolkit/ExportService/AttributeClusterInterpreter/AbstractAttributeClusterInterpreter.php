@@ -2,15 +2,22 @@
 
 namespace ExportToolkit\ExportService\AttributeClusterInterpreter;
 
+use ExportToolkit\Traits\LoggerAwareTrait;
 use Pimcore\Model\Object\AbstractObject;
+use Psr\Log\NullLogger;
 
 abstract class AbstractAttributeClusterInterpreter {
+
+    use LoggerAwareTrait;
 
     protected $data;
 
     public function __construct($config) {
         $this->data = array();
         $this->config = $config;
+
+        // add a default logger implementation so we can rely on a logger being set
+        $this->logger = new NullLogger();
     }
 
     /**
@@ -69,5 +76,4 @@ abstract class AbstractAttributeClusterInterpreter {
     public function isRelevant(AbstractObject $object) {
         return true;
     }
-
 }
