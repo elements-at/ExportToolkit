@@ -1,0 +1,7 @@
+services:
+    app.event_listener.test:
+        class: AppBundle\EventListener\TestListener
+        tags:
+            - { name: kernel.event_listener, event: pimcore.object.postAdd, method: postAddObject }
+            - { name: kernel.event_listener, event: pimcore.object.postUpdate, method: postUpdateObject }
+            - { name: kernel.event_listener, event: pimcore.document.postDelete, method: postDeleteObject }

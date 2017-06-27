@@ -1,0 +1,548 @@
+<?php
+
+namespace Elements\Bundle\ExportToolkitBundle\Controller;
+
+use Elements\Bundle\ExportToolkitBundle\Configuration;
+use Elements\Bundle\ExportToolkitBundle\Configuration\Dao;
+use Elements\Bundle\ExportToolkitBundle\ExportService\IExecutor;
+use Elements\Bundle\ExportToolkitBundle\Helper;
+use Pimcore\Bundle\AdminBundle\Controller\AdminController;
+use Pimcore\Cache;
+use Pimcore\Logger;
+use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+/**
+ * @Route("/admin/elementsexporttoolkit/config")
+ */
+class ConfigController extends AdminController
+{
+
+    public function upgradeAction()
+    {
+        Helper::upgrade();
+        exit();
+    }
+
+    private function buildFolder($path, $name)
+    {
+        return [
+            "id" => $path,
+            "text" => $name,
+            "type" => "folder",
+            "expanded" => true,
+            "iconCls" => "pimcore_icon_folder",
+            "children" => [],
+        ];
+    }
+
+    private function buildItem($configuration)
+    {
+        return [
+            "id" => $configuration->getName(),
+            "text" => $configuration->getName(),
+            "type" => "config",
+            "iconCls" => "pimcore_icon_custom_views",
+            "expandable" => false,
+            "leaf" => true,
+        ];
+
+    }
+
+    /**
+     * @Route("/list")
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function listAction(Request $request)
+    {
+        $folders = Dao::getFolders();
+        $list = Dao::getList();
+
+        $tree = [];
+        $folderStructure = [];
+
+
+        // build a temporary 1 dimensional folder structure
+        foreach ($folders as $folder) {
+            $folderStructure[$folder["path"]] = $this->buildFolder($folder["path"], $folder["name"]);
+
+            // root folders, keep a pointer to 1 dimensional array
+            // to minimize memory and actually make the nesting work
+            if (empty($folder["parent"])) {
+                $tree[] =& $folderStructure[$folder["path"]];
+            }
+        }
+
+        // start nesting folders
+        foreach ($folders as $folder) {
+            $parent = $folder["parent"];
+            $path = $folder["path"];
+
+            if (!empty($parent) && !empty($folderStructure[$parent])) {
+                $folderStructure[$parent]["children"][] =& $folderStructure[$path];
+            }
+        }
+
+        // add configurations to their corresponding folder
+        foreach ($list as $configuration) {
+            $config = $this->buildItem($configuration);
+
+            if (!$configuration->getPath()) {
+                $tree[] = $config;
+            } else {
+                if (!empty($folderStructure[$configuration->getPath()])) {
+                    $folderStructure[$configuration->getPath()]["children"][] = $config;
+                }
+            }
+        }
+
+        return $this->json($tree);
+    }
+
+    /**
+     * @Route("/delete")
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function deleteAction(Request $request)
+    {
+        try {
+            $name = $request->get("name");
+
+            $config = Dao::getByName($name);
+            if (empty($config)) {
+                throw new Exception("Name does not exist.");
+            }
+
+            $config->delete();
+
+            return $this->json(["success" => true]);
+        } catch (Exception $e) {
+            return $this->json(["success" => false, "message" => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * @Route("/add-folder")
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function addFolderAction(Request $request)
+    {
+        $parent = $request->get("parent");
+        $name = $request->get("name");
+
+        try {
+            if (!$name) {
+                throw new \Exception("Invalid name.");
+            }
+
+            Dao::addFolder($parent, $name);
+
+            return $this->json(["success" => true]);
+        } catch (Exception $exception) {
+            return $this->json(["success" => false, "message" => $exception->getMessage()]);
+        }
+    }
+
+    /**
+     * @Route("/delete-folder")
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function deleteFolderAction(Request $request)
+    {
+        $path = $request->get("path");
+
+        if (Dao::getFolderByPath($path)) {
+            Dao::deleteFolder($path);
+
+            return $this->json(["success" => true]);
+        } else {
+            return $this->json(["success" => false]);
+        }
+    }
+
+    /**
+     * @Route("/move")
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function moveAction(Request $request)
+    {
+        $who = $request->get("who");
+        $to = $request->get("to");
+
+        Dao::moveConfiguration($who, $to);
+
+        return new JsonResponse();
+    }
+
+    /**
+     * @Route("/move-folder")
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function moveFolderAction(Request $request)
+    {
+        $who = $request->get("who");
+        $to = $request->get("to");
+
+        Dao::moveFolder($who, $to);
+
+        return new JsonResponse();
+    }
+
+    /**
+     * @Route("/add")
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function addAction(Request $request)
+    {
+        try {
+            $path = $request->get("path");
+            $name = $request->get("name");
+
+            $config = Dao::getByName($name);
+
+            if (!empty($config)) {
+                throw new Exception("Name already exists.");
+            }
+
+            $config = new Configuration($path, $name);
+            $config->save();
+
+            return $this->json(["success" => true, "name" => $name]);
+        } catch (Exception $e) {
+            return $this->json(["success" => false, "message" => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * @Route("/clone")
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function cloneAction(Request $request)
+    {
+        try {
+            $name = $request->get("name");
+
+            $config = Dao::getByName($name);
+            if (!empty($config)) {
+                throw new Exception("Name already exists.");
+            }
+
+            $originalName = $request->get("originalName");
+            $originalConfig = Dao::getByName($originalName);
+            if (!$originalConfig) {
+                throw new Exception("Configuration not found");
+            }
+
+            $originalConfig->setName($name);
+            $originalConfig->save($name);
+
+            return $this->json(["success" => true, "name" => $name]);
+        } catch (Exception $e) {
+            return $this->json(["success" => false, "message" => $e->getMessage()]);
+        }
+    }
+
+
+    /**
+     * @Route("/get")
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getAction(Request $request)
+    {
+        $name = $request->get("name");
+
+        $configuration = Dao::getByName($name);
+        if (empty($configuration)) {
+            throw new Exception("Name does not exist.");
+        }
+
+        if ($configuration && $configuration->configuration->general->executor) {
+            /** @var  $className IExecutor */
+            $className = $configuration->configuration->general->executor;
+            $cli = $className::getCli($name, null);
+        } else {
+            $cli = $this->getCliCommand($configuration->getName());
+        }
+
+        return $this->json(
+            [
+                "name" => $configuration->getName(),
+                "execute" => $cli,
+                "configuration" => $configuration->getConfiguration(),
+            ]
+        );
+    }
+
+    /**
+     * @Route("/save")
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function saveAction(Request $request)
+    {
+
+        try {
+            $data = $request->get("data");
+            $dataDecoded = json_decode($data, true);
+
+            $name = $dataDecoded["general"]["name"];
+            $config = Dao::getByName($name);
+            $config->setConfiguration($dataDecoded);
+            $config->save();
+
+            return $this->json(["success" => true]);
+        } catch (Exception $e) {
+            return $this->json(["success" => false, "message" => $e->getMessage()]);
+        }
+    }
+
+
+    private function loadClasses()
+    {
+
+        $config = Helper::getPluginConfig();
+
+        if ($config["classes"]["override"]) {
+
+            $classes = array();
+            $classlist = $config["classes"]["classlist"];
+            if (!empty($classlist)) {
+                foreach ($classlist as $line) {
+                    if ($line) {
+                        $classes[] = $line;
+                    }
+                }
+            }
+        } else {
+            $classes = get_declared_classes();
+        }
+
+
+        $whiteListedClasses = $classes;
+        $blackListedClasses = [
+            '/^Whoops/i',
+            '/^Zend_/i',
+            '/^Sabre_/i',
+            '/^PEAR_/i',
+            '/^VersionControl_/i',
+            '/^Google_/i',
+            '/^PHPExcel_/i',
+        ];
+
+
+        $additionalBlacklisted = $config["classes"]["blacklist"];
+        if (!empty($additionalBlacklisted)) {
+            foreach ($additionalBlacklisted as $line) {
+                if ($line) {
+                    $blackListedClasses[] = $line;
+                }
+            }
+        }
+        foreach ($blackListedClasses as $blackList) {
+            $whiteListedClasses = preg_grep($blackList, $whiteListedClasses, PREG_GREP_INVERT);
+        }
+
+        return $whiteListedClasses;
+    }
+
+
+    /**
+     * @Route("/get-classes")
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getClassesAction(Request $request)
+    {
+
+        $classes = $this->loadClasses();
+
+        if ($request->get("type") == "attribute-cluster-interpreter") {
+
+            $implementsIConfig = array();
+            foreach ($classes as $class) {
+                try {
+                    $reflect = new \ReflectionClass($class);
+                    if (is_subclass_of(
+                            $class,
+                            "\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\AttributeClusterInterpreter\\AbstractAttributeClusterInterpreter"
+                        ) && $reflect->isInstantiable()
+                    ) {
+                        $implementsIConfig[] = array($class);
+                    }
+                } catch (Exception $e) {
+                }
+            }
+
+            return $this->json($implementsIConfig);
+
+        } else {
+            if ($request->get("type") == "export-filter") {
+
+                $implementsIConfig = array();
+                foreach ($classes as $class) {
+                    try {
+                        $reflect = new \ReflectionClass($class);
+                        if ($reflect->implementsInterface(
+                                '\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\IFilter'
+                            ) && $reflect->isInstantiable()
+                        ) {
+                            $implementsIConfig[] = array($class);
+                        }
+                    } catch (Exception $e) {
+                    }
+                }
+
+                return $this->json($implementsIConfig);
+
+            } else {
+                if ($request->get("type") == "export-conditionmodificator") {
+
+                    $implementsIConfig = array();
+                    foreach ($classes as $class) {
+                        try {
+                            $reflect = new \ReflectionClass($class);
+                            if ($reflect->implementsInterface(
+                                    '\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\IConditionModificator'
+                                ) && $reflect->isInstantiable()
+                            ) {
+                                $implementsIConfig[] = array($class);
+                            }
+                        } catch (Exception $e) {
+                        }
+                    }
+
+                    return $this->json($implementsIConfig);
+
+                } else {
+                    if ($request->get("type") == "attribute-getter") {
+
+                        $implementsIConfig = array();
+                        foreach ($classes as $class) {
+                            try {
+                                $reflect = new \ReflectionClass($class);
+                                if ($reflect->implementsInterface(
+                                        '\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\IGetter'
+                                    ) && $reflect->isInstantiable()
+                                ) {
+                                    $implementsIConfig[] = array($class);
+                                }
+                            } catch (Exception $e) {
+                            }
+                        }
+
+                        return $this->json($implementsIConfig);
+
+                    } else {
+                        if ($request->get("type") == "attribute-interpreter") {
+
+                            $implementsIConfig = array();
+                            foreach ($classes as $class) {
+                                try {
+                                    $reflect = new \ReflectionClass($class);
+                                    if ($reflect->implementsInterface(
+                                            '\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\IInterpreter'
+                                        ) && $reflect->isInstantiable()
+                                    ) {
+                                        $implementsIConfig[] = array($class);
+                                    }
+                                } catch (Exception $e) {
+                                }
+                            }
+
+                            return $this->json($implementsIConfig);
+
+                        } else {
+                            throw new Exception("unknown class type");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @Route("/clear-cache")
+     * @param Request $request
+     * @return Response
+     */
+    public function clearCacheAction() {
+
+        Cache::clearTag("exporttoolkit");
+        return new Response();
+
+    }
+
+
+    protected function getCliCommand($configName)
+    {
+        return \Pimcore\Tool\Console::getPhpCli(
+            )." ".PIMCORE_PROJECT_ROOT.'/bin/console export-toolkit:export --config-name="'.$configName.'"';
+    }
+
+    /**
+     * @Route("/execute-export")
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function executeExportAction(Request $request)
+    {
+
+        $workername = $request->get("name");
+        $config = Dao::getByName($workername);
+
+        if ($config && $config->configuration->general->executor) {
+            /** @var  $className IExecutor */
+            $className = $config->configuration->general->executor;
+            try {
+                $className::execute($workername, null);
+            } catch (Exception $e) {
+                return $this->json(["success" => false, "message" => $e->getMessage()]);
+            }
+        } else {
+            $lockkey = "exporttoolkit_".$workername;
+            if (\Pimcore\Model\Tool\Lock::isLocked($lockkey, 3 * 60 * 60)) { //lock for 3h
+                return $this->json(["success" => false]);
+            }
+
+            $cmd = $this->getCliCommand($workername);
+            Logger::info($cmd);
+            \Pimcore\Tool\Console::execInBackground(
+                $cmd,
+                PIMCORE_LOG_DIRECTORY.DIRECTORY_SEPARATOR."exporttoolkit-output.log"
+            );
+        }
+
+        return $this->json(["success" => true]);
+    }
+
+
+    /**
+     * @Route("/is-export-running")
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function isExportRunningAction(Request $request)
+    {
+        $workername = $request->get("name");
+        $lockkey = "exporttoolkit_".$workername;
+
+        if (\Pimcore\Model\Tool\Lock::isLocked($lockkey, 3 * 60 * 60)) { //lock for 3h
+            return $this->json(["success" => true, "locked" => true]);
+        } else {
+            return $this->json(["success" => true, "locked" => false]);
+        }
+    }
+
+}

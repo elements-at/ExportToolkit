@@ -4,8 +4,17 @@ Base of each export is an export configuration which is described below.
 
 ![export-toolkit](doc/images/export-toolkit.png)
 
-## Export Configuration
+## Migration notes from Pimcore 4 to 5
 
+* migrate the config format to version 2.0 (see migrate-2.0.php)
+* move the plugin's configuration file from website/var/plugins/ExportToolkit to 
+            var/config/ExportToolkit/config.php
+* Please note that the namespaces have been changed!!!
+** Change ExportToolkit\* to Elements\Bundle\ExportToolkitBundle\*
+** This also affects your export configurations. Check export-toolkit-configurations.php
+* Be aware that this also affects your custom implementations (interpreters, getters and so so on). So you might have to change code. 
+* adapt your crontab 
+* The default output directory also has changed (used every time you don't specify a output file) to var/tmp/ExportToolkit
 
 ### Export Configuration
 
