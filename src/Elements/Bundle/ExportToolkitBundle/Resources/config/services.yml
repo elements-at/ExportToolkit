@@ -1,7 +1,12 @@
 services:
-    app.event_listener.test:
-        class: AppBundle\EventListener\TestListener
+    exporttoolkit.event_listener:
+        class: Elements\Bundle\ExportToolkitBundle\EventListener\ExportListener
+#        lazy: true
+        arguments:
+            - "@exporttoolkit.exportservice"
         tags:
-            - { name: kernel.event_listener, event: pimcore.object.postAdd, method: postAddObject }
-            - { name: kernel.event_listener, event: pimcore.object.postUpdate, method: postUpdateObject }
-            - { name: kernel.event_listener, event: pimcore.document.postDelete, method: postDeleteObject }
+            - { name: kernel.event_subscriber }
+
+
+    exporttoolkit.exportservice:
+        class: Elements\Bundle\ExportToolkitBundle\ExportService

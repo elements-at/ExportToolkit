@@ -45,38 +45,6 @@ class ElementsExportToolkitBundle extends AbstractPimcoreBundle
 
     }
 
-    public function postAddObject($object) {
-        try {
-            $this->getExportService()->setUpExport(true);
-            $this->getExportService()->updateExport($object, true);
-            $this->getExportService()->commitData(true);
-        } catch (\Exception $e) {
-            Logger::error($e);
-        }
-
-    }
-
-    public function postUpdateObject($object) {
-        try {
-            $this->getExportService()->setUpExport(true);
-            $this->getExportService()->updateExport($object, true);
-            $this->getExportService()->commitData(true);
-        } catch (\Exception $e) {
-            Logger::error($e);
-        }
-    }
-
-
-    public function postDeleteObject($object) {
-        try {
-            $this->getExportService()->setUpExport(true, "delete");
-            $this->getExportService()->deleteFromExport($object, true);
-            $this->getExportService()->commitData(true, "delete");
-        } catch (\Exception $e) {
-            Logger::error($e);
-        }
-    }
-
     /**
      * {@inheritdoc}
      */
