@@ -59,8 +59,9 @@ ExportToolkit.ConfigPanel = Class.create({
                 region: "west",
                 scrollable: true,
                 border: true,
-                width: 200,
+                width: 300,
                 rootVisible: true,
+                split: true,
                 viewConfig: {
                     xtype: 'pimcoretreeview',
                     plugins: {

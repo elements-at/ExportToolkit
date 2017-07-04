@@ -14,7 +14,7 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
             deferredRender: false,
             forceLayout: true,
             // Note, this must be the same id as used in panel.js
-            id: "plugin_exporttoolkit_configpanel_panel_" + data.name,
+            id: ExportToolkit.config.ITEM_PANEL_PREFIX + data.name,
             buttons: {
                 componentCls: 'plugin_exporttoolkit_statusbar',
                 itemId: 'footer',
