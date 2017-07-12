@@ -102,7 +102,7 @@ class ExportService {
             $pageSize = $totalObjectCount;
         }
 
-        $this->setUpExport(false);
+        $worker->setUpExport(false);
 
 
         //step 2 - exporting data
