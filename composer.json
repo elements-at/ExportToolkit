@@ -15,7 +15,7 @@
   "extra": {
     "pimcore": {
       "bundles": [
-        "Elements\\Bundle\\ProcessManagerBundle\\ElementsExportToolkitBundle"
+        "Elements\\Bundle\\ExportToolkitBundle\\ElementsExportToolkitBundle"
       ]
     }
   }
