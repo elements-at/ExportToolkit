@@ -2,16 +2,14 @@
 
 namespace Elements\Bundle\ExportToolkitBundle\EventListener;
 
-
 use Elements\Bundle\ExportToolkitBundle\ExportService;
-use Pimcore\Event\Model\ObjectEvent;
-use Pimcore\Event\ObjectEvents;
+use Pimcore\Event\Model\DataObjectEvent;
+use Pimcore\Event\DataObjectEvents;
 use Pimcore\Logger;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class ExportListener implements EventSubscriberInterface
 {
-
     protected $exportService;
 
     public function  __construct(ExportService $exportService)
@@ -19,7 +17,7 @@ class ExportListener implements EventSubscriberInterface
         $this->exportService = $exportService;
     }
 
-    public function postAddObject(ObjectEvent $event) {
+    public function postAddObject(DataObjectEvent $event) {
         try {
             $object = $event->getObject();
             $this->exportService->setUpExport(true);
@@ -31,7 +29,7 @@ class ExportListener implements EventSubscriberInterface
 
     }
 
-    public function postUpdateObject(ObjectEvent $event) {
+    public function postUpdateObject(DataObjectEvent $event) {
         try {
             $object = $event->getObject();
             $this->exportService->setUpExport(true);
@@ -42,8 +40,7 @@ class ExportListener implements EventSubscriberInterface
         }
     }
 
-
-    public function postDeleteObject(ObjectEvent $event) {
+    public function postDeleteObject(DataObjectEvent $event) {
         try {
             $object = $event->getObject();$object = $event->getObject();
             $this->exportService->setUpExport(true, "delete");
@@ -74,12 +71,10 @@ class ExportListener implements EventSubscriberInterface
      */
     public static function getSubscribedEvents()
     {
-        return array(
-            ObjectEvents::POST_UPDATE => array("postUpdateObject", 100),
-            ObjectEvents::POST_DELETE => "postDeleteObject",
-            ObjectEvents::POST_ADD => "postAddObject"
-
-        );
+        return [
+            DataObjectEvents::POST_UPDATE => array("postUpdateObject", 100),
+            DataObjectEvents::POST_DELETE => "postDeleteObject",
+            DataObjectEvents::POST_ADD => "postAddObject"
+        ];
     }
-
 }
