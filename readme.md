@@ -123,9 +123,3 @@ Each attribute cluster has one or more attributes. An attribute is one data entr
    * translator: possible values are admin or website for using admin or website translations to translate the value
 
 
-> ###To be able to select available classes a class map has to be created with the pimcore classmap generator.
-
-
-# Development Instance 
-> https://objecttools.elements.zone/admin/ 
-
