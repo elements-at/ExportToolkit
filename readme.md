@@ -121,5 +121,7 @@ Each attribute cluster has one or more attributes. An attribute is one data entr
 * translates the value using the pimcore translations.
 * Available configuration options:
    * translator: possible values are admin or website for using admin or website translations to translate the value
+   
+  
 
 
