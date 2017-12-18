@@ -1,9 +1,16 @@
 <?php
+
 /**
- * Created by PhpStorm.
- * User: tmittendorfer
- * Date: 10.04.2015
- * Time: 10:56
+ * Pimcore
+ *
+ * This source file is available under two different licenses:
+ * - GNU General Public License version 3 (GPLv3)
+ * - Pimcore Enterprise License (PEL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ *  @copyright  Copyright (c) elements.at New Media Solutions GmbH (http://www.elements.at)
+ *  @license    http://www.pimcore.org/license     GPLv3 and PEL
  */
 
 namespace ExportToolkit\ExportService\Interpreter;
@@ -11,23 +18,22 @@ namespace ExportToolkit\ExportService\Interpreter;
 use ExportToolkit\ExportService\IInterpreter;
 use Pimcore\Model\Object\Data\KeyValue;
 
-class KeyValueToString implements IInterpreter {
-
+class KeyValueToString implements IInterpreter
+{
     public static function interpret($value, $config = null)
     {
-        $result = "";
+        $result = '';
 
-        if($value instanceof KeyValue) {
-
-            foreach($value->getProperties() as $prop) {
-                $result.="|id=".$prop['id']."&key=".$prop['key']."&value=".$prop['value']."";
+        if ($value instanceof KeyValue) {
+            foreach ($value->getProperties() as $prop) {
+                $result .= '|id='.$prop['id'].'&key='.$prop['key'].'&value='.$prop['value'].'';
             }
 
-            if($result != "") {
+            if ($result != '') {
                 $result = substr($result, 1);
             }
-
         }
+
         return $result;
     }
 }
