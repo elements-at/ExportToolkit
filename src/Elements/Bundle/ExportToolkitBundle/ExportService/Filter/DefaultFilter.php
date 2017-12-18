@@ -1,21 +1,31 @@
 <?php
 
+/**
+ * Pimcore
+ *
+ * This source file is available under two different licenses:
+ * - GNU General Public License version 3 (GPLv3)
+ * - Pimcore Enterprise License (PEL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ *  @copyright  Copyright (c) Pimcore GmbH (http://www.pimcore.org)
+ *  @license    http://www.pimcore.org/license     GPLv3 and PEL
+ */
+
 namespace Elements\Bundle\ExportToolkitBundle\ExportService\Filter;
 
 use Elements\Bundle\ExportToolkitBundle\ExportService\IFilter;
 use Pimcore\Model\Object\AbstractObject;
 
-class DefaultFilter implements IFilter {
-
-    public function doExport($object, $config = null) {
-
-        if($object instanceof AbstractObject) {
+class DefaultFilter implements IFilter
+{
+    public function doExport($object, $config = null)
+    {
+        if ($object instanceof AbstractObject) {
             return true;
         }
 
         return false;
-
     }
-
-
 }

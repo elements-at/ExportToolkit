@@ -1,13 +1,25 @@
 <?php
 
+/**
+ * Pimcore
+ *
+ * This source file is available under two different licenses:
+ * - GNU General Public License version 3 (GPLv3)
+ * - Pimcore Enterprise License (PEL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ *  @copyright  Copyright (c) Pimcore GmbH (http://www.pimcore.org)
+ *  @license    http://www.pimcore.org/license     GPLv3 and PEL
+ */
+
 namespace Elements\Bundle\ExportToolkitBundle\ExportService\AttributeClusterInterpreter;
 
-use Pimcore\Model\Object\AbstractObject;
 use Elements\Bundle\ExportToolkitBundle\SimpleXMLExtended;
+use Pimcore\Model\Object\AbstractObject;
 
 class DefaultXml extends AbstractAttributeClusterInterpreter
 {
-
     protected $firstData = true;
 
     public function __construct($config)
@@ -19,7 +31,7 @@ class DefaultXml extends AbstractAttributeClusterInterpreter
 
     protected function getExportFile()
     {
-        $file = $this->config->filename ? PIMCORE_PROJECT_ROOT . "/" .$this->config->filename : PIMCORE_SYSTEM_TEMP_DIRECTORY."/ExportToolkit/export.xml";
+        $file = $this->config->filename ? PIMCORE_PROJECT_ROOT . '/' .$this->config->filename : PIMCORE_SYSTEM_TEMP_DIRECTORY.'/ExportToolkit/export.xml';
         $dir = dirname($file);
         if (!is_dir($dir)) {
             \Pimcore\File::mkdir($dir, null, true);
@@ -28,17 +40,15 @@ class DefaultXml extends AbstractAttributeClusterInterpreter
         return $file;
     }
 
-
     public function commitDataRow(AbstractObject $object)
     {
     }
-
 
     public function commitData()
     {
         $xml = $this->createXml($this->data);
         file_put_contents($this->getExportFile(), $xml);
-        die("committed");
+        die('committed');
     }
 
     public function deleteFromExport(AbstractObject $object)
@@ -59,8 +69,6 @@ class DefaultXml extends AbstractAttributeClusterInterpreter
         }
 
         foreach ($data as $k => $v) {
-
-
             if (is_array($v)) {
                 $rowName = ($this->config->rowElementName ?: 'row');
 

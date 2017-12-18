@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Pimcore
  *
@@ -8,8 +9,8 @@
  * Full copyright and license information is available in
  * LICENSE.md which is distributed with this source code.
  *
- * @copyright  Copyright (c) 2009-2016 pimcore GmbH (http://www.pimcore.org)
- * @license    http://www.pimcore.org/license     GPLv3 and PEL
+ *  @copyright  Copyright (c) Pimcore GmbH (http://www.pimcore.org)
+ *  @license    http://www.pimcore.org/license     GPLv3 and PEL
  */
 
 namespace Elements\Bundle\ExportToolkitBundle\Command;
@@ -38,26 +39,24 @@ class ExportCommand extends AbstractCommand
             ->addOption(
                 'monitoring-item-id', null,
                 InputOption::VALUE_REQUIRED,
-                "Contains the monitoring item if executed via the Pimcore backend"
+                'Contains the monitoring item if executed via the Pimcore backend'
             );
-        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $monitoringItemId = $input->getOption('monitoring-item-id');
-        if(!$monitoringItemId){ //executed directly from export toolkit
+        if (!$monitoringItemId) { //executed directly from export toolkit
             $lockKey = 'exporttoolkit_'.$input->getOption('config-name');
             \Pimcore\Model\Tool\Lock::acquire($lockKey);
         }
 
-        $this->initProcessManager($input->getOption('monitoring-item-id'),["autoCreate" => true,"name" => $input->getOption('config-name')]);
+        $this->initProcessManager($input->getOption('monitoring-item-id'), ['autoCreate' => true, 'name' => $input->getOption('config-name')]);
         $service = new ExportService();
         $service->executeExport($input->getOption('config-name'));
 
-        if(!$monitoringItemId){
+        if (!$monitoringItemId) {
             \Pimcore\Model\Tool\Lock::release($lockKey);
         }
     }
-
 }

@@ -1,5 +1,18 @@
 <?php
 
+/**
+ * Pimcore
+ *
+ * This source file is available under two different licenses:
+ * - GNU General Public License version 3 (GPLv3)
+ * - Pimcore Enterprise License (PEL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ *  @copyright  Copyright (c) Pimcore GmbH (http://www.pimcore.org)
+ *  @license    http://www.pimcore.org/license     GPLv3 and PEL
+ */
+
 namespace Elements\Bundle\ExportToolkitBundle\Configuration;
 
 use Elements\Bundle\ExportToolkitBundle\Configuration;
@@ -10,12 +23,12 @@ use Pimcore\Tool\RestClient\Exception;
 
 class Dao extends AbstractDao
 {
-    const ROOT_PATH = "/";
+    const ROOT_PATH = '/';
 
     /**
      * path to the configuration file
      */
-    const CONFIG_FILE = "export-toolkit-configurations.php";
+    const CONFIG_FILE = 'export-toolkit-configurations.php';
 
     /**
      * save a configuration.
@@ -23,9 +36,9 @@ class Dao extends AbstractDao
     public function save()
     {
         $name = $this->model->getName();
-        $config =& self::getConfig();
+        $config = & self::getConfig();
 
-        $config["list"][$name] = json_decode(json_encode($this->model->getConfiguration()), true);
+        $config['list'][$name] = json_decode(json_encode($this->model->getConfiguration()), true);
 
         self::writeConfig($config);
     }
@@ -36,9 +49,9 @@ class Dao extends AbstractDao
     public function delete()
     {
         $name = $this->model->getName();
-        $config =& self::getConfig();
+        $config = & self::getConfig();
 
-        unset($config["list"][$name]);
+        unset($config['list'][$name]);
 
         self::writeConfig($config);
     }
@@ -47,6 +60,7 @@ class Dao extends AbstractDao
      * get a configuration by name.
      *
      * @param string $name
+     *
      * @return Configuration|null
      */
     public static function getByName($name)
@@ -54,7 +68,9 @@ class Dao extends AbstractDao
         $list = self::getList();
 
         foreach ($list as $item) {
-            if ($item->getName() == $name) return $item;
+            if ($item->getName() == $name) {
+                return $item;
+            }
         }
 
         return null;
@@ -67,21 +83,25 @@ class Dao extends AbstractDao
      */
     public static function getFolders()
     {
-        $config =& self::getConfig();
-        return $config["folders"];
+        $config = & self::getConfig();
+
+        return $config['folders'];
     }
 
     /**
      * get a folder by path.
      *
      * @param $path
+     *
      * @return mixed|null
      */
     public static function getFolderByPath($path)
     {
         $folders = self::getFolders();
 
-        if (!empty($folders[$path])) return $folders[$path];
+        if (!empty($folders[$path])) {
+            return $folders[$path];
+        }
 
         return null;
     }
@@ -92,26 +112,32 @@ class Dao extends AbstractDao
      * @param $parent
      * @param $name
      * @param bool $save
+     *
      * @return array
+     *
      * @throws Exception
      */
     public static function addFolder($parent, $name, $save = true)
     {
-        if (!$parent) $parent = null;
+        if (!$parent) {
+            $parent = null;
+        }
 
-        $path = (!$parent ? self::ROOT_PATH : $parent) . $name . "/";
+        $path = (!$parent ? self::ROOT_PATH : $parent) . $name . '/';
 
-        if (self::getFolderByPath($path)) throw new Exception("directory already exists.");
+        if (self::getFolderByPath($path)) {
+            throw new Exception('directory already exists.');
+        }
 
-        $config =& self::getConfig();
+        $config = & self::getConfig();
 
         $folder = [
-            "parent" => $parent,
-            "path" => $path,
-            "name" => $name
+            'parent' => $parent,
+            'path' => $path,
+            'name' => $name
         ];
 
-        $config["folders"][$path] = $folder;
+        $config['folders'][$path] = $folder;
 
         if ($save) {
             self::writeConfig($config);
@@ -127,7 +153,7 @@ class Dao extends AbstractDao
      */
     public static function deleteFolder($path)
     {
-        $config =& self::getConfig();
+        $config = & self::getConfig();
 
         self::deleteFolderRec($config, $path);
 
@@ -136,18 +162,18 @@ class Dao extends AbstractDao
 
     private static function deleteFolderRec(&$config, $path)
     {
-        if (!empty($config["folders"][$path])) {
-            unset($config["folders"][$path]);
+        if (!empty($config['folders'][$path])) {
+            unset($config['folders'][$path]);
 
-            foreach ($config["list"] as $key => $item) {
-                if ($item["general"]["path"] == $path) {
-                    unset($config["list"][$key]);
+            foreach ($config['list'] as $key => $item) {
+                if ($item['general']['path'] == $path) {
+                    unset($config['list'][$key]);
                 }
             }
 
-            foreach ($config["folders"] as $folder) {
-                if ($folder["parent"] == $path) {
-                    self::deleteFolderRec($config, $folder["path"]);
+            foreach ($config['folders'] as $folder) {
+                if ($folder['parent'] == $path) {
+                    self::deleteFolderRec($config, $folder['path']);
                 }
             }
         }
@@ -157,7 +183,9 @@ class Dao extends AbstractDao
     {
         $configuration = self::getByName($who);
 
-        if (!$configuration) return;
+        if (!$configuration) {
+            return;
+        }
 
         $configuration->setPath($to);
 
@@ -168,37 +196,40 @@ class Dao extends AbstractDao
     {
         self::moveFolderRec($who, $to);
 
-        $config =& self::getConfig();
+        $config = & self::getConfig();
         self::writeConfig($config);
     }
 
-    private static function moveFolderRec($who, $to) {
-        $config =& self::getConfig();
+    private static function moveFolderRec($who, $to)
+    {
+        $config = & self::getConfig();
 
-        if (empty($config["folders"][$who])) return;
+        if (empty($config['folders'][$who])) {
+            return;
+        }
 
-        $folder = $config["folders"][$who];
+        $folder = $config['folders'][$who];
 
-        unset($config["folders"][$who]);
+        unset($config['folders'][$who]);
 
-        $now = self::addFolder($to, $folder["name"], false);
+        $now = self::addFolder($to, $folder['name'], false);
 
-        foreach($config["list"] as &$item) {
-            if($item["general"]["path"] == $who) {
-                $item["general"]["path"] = $now["path"];
+        foreach ($config['list'] as &$item) {
+            if ($item['general']['path'] == $who) {
+                $item['general']['path'] = $now['path'];
             }
         }
 
-        self::moveSubfolders($who, $now["path"]);
+        self::moveSubfolders($who, $now['path']);
     }
 
     private static function moveSubfolders($old, $now)
     {
-        $config =& self::getConfig();
+        $config = & self::getConfig();
 
-        foreach($config["folders"] as $folder) {
-            if($folder["parent"] == $old) {
-                self::moveFolderRec($folder["path"], $now);
+        foreach ($config['folders'] as $folder) {
+            if ($folder['parent'] == $old) {
+                self::moveFolderRec($folder['path'], $now);
             }
         }
     }
@@ -210,11 +241,11 @@ class Dao extends AbstractDao
      */
     public static function getList()
     {
-        $config =& self::getConfig();
+        $config = & self::getConfig();
         $configurations = [];
 
-        foreach ($config["list"] as $item) {
-            $configurations[] = new Configuration($item["general"]["path"], $item["general"]["name"], json_decode(json_encode($item)));
+        foreach ($config['list'] as $item) {
+            $configurations[] = new Configuration($item['general']['path'], $item['general']['name'], json_decode(json_encode($item)));
         }
 
         return $configurations;
@@ -229,7 +260,9 @@ class Dao extends AbstractDao
      */
     private static function &getConfig()
     {
-        if (self::$_config) return self::$_config;
+        if (self::$_config) {
+            return self::$_config;
+        }
 
         $file = Config::locateConfigFile(self::CONFIG_FILE);
         $config = null;
@@ -265,8 +298,8 @@ class Dao extends AbstractDao
     private static function defaultConfig()
     {
         return [
-            "folders" => [],
-            "list" => []
+            'folders' => [],
+            'list' => []
         ];
     }
 }

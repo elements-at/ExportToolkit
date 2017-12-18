@@ -1,19 +1,33 @@
 <?php
 
+/**
+ * Pimcore
+ *
+ * This source file is available under two different licenses:
+ * - GNU General Public License version 3 (GPLv3)
+ * - Pimcore Enterprise License (PEL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ *  @copyright  Copyright (c) Pimcore GmbH (http://www.pimcore.org)
+ *  @license    http://www.pimcore.org/license     GPLv3 and PEL
+ */
+
 namespace Elements\Bundle\ExportToolkitBundle\ExportService\AttributeClusterInterpreter;
 
 use Elements\Bundle\ExportToolkitBundle\Traits\LoggerAwareTrait;
 use Pimcore\Model\Object\AbstractObject;
 use Psr\Log\NullLogger;
 
-abstract class AbstractAttributeClusterInterpreter {
-
+abstract class AbstractAttributeClusterInterpreter
+{
     use LoggerAwareTrait;
 
     protected $data;
 
-    public function __construct($config) {
-        $this->data = array();
+    public function __construct($config)
+    {
+        $this->data = [];
         $this->config = $config;
 
         // add a default logger implementation so we can rely on a logger being set
@@ -26,7 +40,7 @@ abstract class AbstractAttributeClusterInterpreter {
      * If not needed, just leave the method empty.
      *
      */
-    public abstract function setUpExport();
+    abstract public function setUpExport();
 
     /**
      * used internally to set data to the data array
@@ -35,7 +49,8 @@ abstract class AbstractAttributeClusterInterpreter {
      * @param $key
      * @param $value
      */
-    public function setData(AbstractObject $object, $key, $value) {
+    public function setData(AbstractObject $object, $key, $value)
+    {
         $rowData = $this->data[$object->getId()];
         $rowData[$key] = $value;
         $this->data[$object->getId()] = $rowData;
@@ -50,7 +65,7 @@ abstract class AbstractAttributeClusterInterpreter {
      *
      * @param AbstractObject $object
      */
-    public abstract function commitDataRow(AbstractObject $object);
+    abstract public function commitDataRow(AbstractObject $object);
 
     /**
      * This method is executed after all objects are exported.
@@ -58,7 +73,7 @@ abstract class AbstractAttributeClusterInterpreter {
      * For example it can be used to write all data to a xml file or commit a database transaction, etc.
      *
      */
-    public abstract function commitData();
+    abstract public function commitData();
 
     /**
      * This method is executed of an object is not exported (anymore).
@@ -66,14 +81,15 @@ abstract class AbstractAttributeClusterInterpreter {
      *
      * @param AbstractObject $object
      */
-    public abstract function deleteFromExport(AbstractObject $object);
-
+    abstract public function deleteFromExport(AbstractObject $object);
 
     /** Override point
      * @param AbstractObject $object
+     *
      * @return bool return true if interpreter wants to consume the object
      */
-    public function isRelevant(AbstractObject $object) {
+    public function isRelevant(AbstractObject $object)
+    {
         return true;
     }
 }

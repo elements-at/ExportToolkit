@@ -1,9 +1,9 @@
 <?php
 $config = $this->config;
-$classlist = $config["classes"]["classlist"];
-$classlist = $classlist ? implode("\r\n", $classlist) : "";
-$blacklist = $config["classes"]["blacklist"];
-$blacklist = $blacklist ? implode("\r\n", $blacklist) : "";
+$classlist = $config['classes']['classlist'];
+$classlist = $classlist ? implode("\r\n", $classlist) : '';
+$blacklist = $config['classes']['blacklist'];
+$blacklist = $blacklist ? implode("\r\n", $blacklist) : '';
 ?>
 <h1>Export Toolkit</h1>
 <form action="" method="post">
@@ -11,7 +11,9 @@ $blacklist = $blacklist ? implode("\r\n", $blacklist) : "";
         <tr>
             <td>
             <b>Use custom class list:</b>
-            <input type="checkbox" name="override" value="1" <?php if($config["classes"]["override"]){?> checked="checked" <?php } ?>/>
+            <input type="checkbox" name="override" value="1" <?php if ($config['classes']['override']) {
+    ?> checked="checked" <?php
+} ?>/>
             </td>
         </tr>
         <tr>

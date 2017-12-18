@@ -1,5 +1,18 @@
 <?php
 
+/**
+ * Pimcore
+ *
+ * This source file is available under two different licenses:
+ * - GNU General Public License version 3 (GPLv3)
+ * - Pimcore Enterprise License (PEL)
+ * Full copyright and license information is available in
+ * LICENSE.md which is distributed with this source code.
+ *
+ *  @copyright  Copyright (c) Pimcore GmbH (http://www.pimcore.org)
+ *  @license    http://www.pimcore.org/license     GPLv3 and PEL
+ */
+
 namespace Elements\Bundle\ExportToolkitBundle\Controller;
 
 use Elements\Bundle\ExportToolkitBundle\Configuration;
@@ -20,7 +33,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ConfigController extends AdminController
 {
-
     public function upgradeAction()
     {
         Helper::upgrade();
@@ -30,31 +42,32 @@ class ConfigController extends AdminController
     private function buildFolder($path, $name)
     {
         return [
-            "id" => $path,
-            "text" => $name,
-            "type" => "folder",
-            "expanded" => true,
-            "iconCls" => "pimcore_icon_folder",
-            "children" => [],
+            'id' => $path,
+            'text' => $name,
+            'type' => 'folder',
+            'expanded' => true,
+            'iconCls' => 'pimcore_icon_folder',
+            'children' => [],
         ];
     }
 
     private function buildItem($configuration)
     {
         return [
-            "id" => $configuration->getName(),
-            "text" => $configuration->getName(),
-            "type" => "config",
-            "iconCls" => "pimcore_icon_custom_views",
-            "expandable" => false,
-            "leaf" => true,
+            'id' => $configuration->getName(),
+            'text' => $configuration->getName(),
+            'type' => 'config',
+            'iconCls' => 'pimcore_icon_custom_views',
+            'expandable' => false,
+            'leaf' => true,
         ];
-
     }
 
     /**
      * @Route("/list")
+     *
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function listAction(Request $request)
@@ -65,25 +78,24 @@ class ConfigController extends AdminController
         $tree = [];
         $folderStructure = [];
 
-
         // build a temporary 1 dimensional folder structure
         foreach ($folders as $folder) {
-            $folderStructure[$folder["path"]] = $this->buildFolder($folder["path"], $folder["name"]);
+            $folderStructure[$folder['path']] = $this->buildFolder($folder['path'], $folder['name']);
 
             // root folders, keep a pointer to 1 dimensional array
             // to minimize memory and actually make the nesting work
-            if (empty($folder["parent"])) {
-                $tree[] =& $folderStructure[$folder["path"]];
+            if (empty($folder['parent'])) {
+                $tree[] = & $folderStructure[$folder['path']];
             }
         }
 
         // start nesting folders
         foreach ($folders as $folder) {
-            $parent = $folder["parent"];
-            $path = $folder["path"];
+            $parent = $folder['parent'];
+            $path = $folder['path'];
 
             if (!empty($parent) && !empty($folderStructure[$parent])) {
-                $folderStructure[$parent]["children"][] =& $folderStructure[$path];
+                $folderStructure[$parent]['children'][] = & $folderStructure[$path];
             }
         }
 
@@ -95,7 +107,7 @@ class ConfigController extends AdminController
                 $tree[] = $config;
             } else {
                 if (!empty($folderStructure[$configuration->getPath()])) {
-                    $folderStructure[$configuration->getPath()]["children"][] = $config;
+                    $folderStructure[$configuration->getPath()]['children'][] = $config;
                 }
             }
         }
@@ -105,77 +117,85 @@ class ConfigController extends AdminController
 
     /**
      * @Route("/delete")
+     *
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function deleteAction(Request $request)
     {
         try {
-            $name = $request->get("name");
+            $name = $request->get('name');
 
             $config = Dao::getByName($name);
             if (empty($config)) {
-                throw new Exception("Name does not exist.");
+                throw new Exception('Name does not exist.');
             }
 
             $config->delete();
 
-            return $this->json(["success" => true]);
+            return $this->json(['success' => true]);
         } catch (Exception $e) {
-            return $this->json(["success" => false, "message" => $e->getMessage()]);
+            return $this->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
     /**
      * @Route("/add-folder")
+     *
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function addFolderAction(Request $request)
     {
-        $parent = $request->get("parent");
-        $name = $request->get("name");
+        $parent = $request->get('parent');
+        $name = $request->get('name');
 
         try {
             if (!$name) {
-                throw new \Exception("Invalid name.");
+                throw new \Exception('Invalid name.');
             }
 
             Dao::addFolder($parent, $name);
 
-            return $this->json(["success" => true]);
+            return $this->json(['success' => true]);
         } catch (Exception $exception) {
-            return $this->json(["success" => false, "message" => $exception->getMessage()]);
+            return $this->json(['success' => false, 'message' => $exception->getMessage()]);
         }
     }
 
     /**
      * @Route("/delete-folder")
+     *
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function deleteFolderAction(Request $request)
     {
-        $path = $request->get("path");
+        $path = $request->get('path');
 
         if (Dao::getFolderByPath($path)) {
             Dao::deleteFolder($path);
 
-            return $this->json(["success" => true]);
+            return $this->json(['success' => true]);
         } else {
-            return $this->json(["success" => false]);
+            return $this->json(['success' => false]);
         }
     }
 
     /**
      * @Route("/move")
+     *
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function moveAction(Request $request)
     {
-        $who = $request->get("who");
-        $to = $request->get("to");
+        $who = $request->get('who');
+        $to = $request->get('to');
 
         Dao::moveConfiguration($who, $to);
 
@@ -184,13 +204,15 @@ class ConfigController extends AdminController
 
     /**
      * @Route("/move-folder")
+     *
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function moveFolderAction(Request $request)
     {
-        $who = $request->get("who");
-        $to = $request->get("to");
+        $who = $request->get('who');
+        $to = $request->get('to');
 
         Dao::moveFolder($who, $to);
 
@@ -199,77 +221,82 @@ class ConfigController extends AdminController
 
     /**
      * @Route("/add")
+     *
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function addAction(Request $request)
     {
         try {
-            $path = $request->get("path");
-            $name = $request->get("name");
+            $path = $request->get('path');
+            $name = $request->get('name');
 
             $config = Dao::getByName($name);
 
             if (!empty($config)) {
-                throw new Exception("Name already exists.");
+                throw new Exception('Name already exists.');
             }
 
             $config = new Configuration($path, $name);
             $config->save();
 
-            return $this->json(["success" => true, "name" => $name]);
+            return $this->json(['success' => true, 'name' => $name]);
         } catch (Exception $e) {
-            return $this->json(["success" => false, "message" => $e->getMessage()]);
+            return $this->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
     /**
      * @Route("/clone")
+     *
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function cloneAction(Request $request)
     {
         try {
-            $name = $request->get("name");
+            $name = $request->get('name');
 
             $config = Dao::getByName($name);
             if (!empty($config)) {
-                throw new Exception("Name already exists.");
+                throw new Exception('Name already exists.');
             }
 
-            $originalName = $request->get("originalName");
+            $originalName = $request->get('originalName');
             $originalConfig = Dao::getByName($originalName);
             if (!$originalConfig) {
-                throw new Exception("Configuration not found");
+                throw new Exception('Configuration not found');
             }
 
             $originalConfig->setName($name);
             $originalConfig->save($name);
 
-            return $this->json(["success" => true, "name" => $name]);
+            return $this->json(['success' => true, 'name' => $name]);
         } catch (Exception $e) {
-            return $this->json(["success" => false, "message" => $e->getMessage()]);
+            return $this->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
-
     /**
      * @Route("/get")
+     *
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function getAction(Request $request)
     {
-        $name = $request->get("name");
+        $name = $request->get('name');
 
         $configuration = Dao::getByName($name);
         if (empty($configuration)) {
-            throw new Exception("Name does not exist.");
+            throw new Exception('Name does not exist.');
         }
 
         if ($configuration && $configuration->configuration->general->executor) {
-            /** @var  $className IExecutor */
+            /** @var $className IExecutor */
             $className = $configuration->configuration->general->executor;
             $cli = $className::getCli($name, null);
         } else {
@@ -278,46 +305,44 @@ class ConfigController extends AdminController
 
         return $this->json(
             [
-                "name" => $configuration->getName(),
-                "execute" => $cli,
-                "configuration" => $configuration->getConfiguration(),
+                'name' => $configuration->getName(),
+                'execute' => $cli,
+                'configuration' => $configuration->getConfiguration(),
             ]
         );
     }
 
     /**
      * @Route("/save")
+     *
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function saveAction(Request $request)
     {
-
         try {
-            $data = $request->get("data");
+            $data = $request->get('data');
             $dataDecoded = json_decode($data, true);
 
-            $name = $dataDecoded["general"]["name"];
+            $name = $dataDecoded['general']['name'];
             $config = Dao::getByName($name);
             $config->setConfiguration($dataDecoded);
             $config->save();
 
-            return $this->json(["success" => true]);
+            return $this->json(['success' => true]);
         } catch (Exception $e) {
-            return $this->json(["success" => false, "message" => $e->getMessage()]);
+            return $this->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
-
     private function loadClasses()
     {
-
         $config = Helper::getPluginConfig();
 
-        if ($config["classes"]["override"]) {
-
-            $classes = array();
-            $classlist = $config["classes"]["classlist"];
+        if ($config['classes']['override']) {
+            $classes = [];
+            $classlist = $config['classes']['classlist'];
             if (!empty($classlist)) {
                 foreach ($classlist as $line) {
                     if ($line) {
@@ -328,7 +353,6 @@ class ConfigController extends AdminController
         } else {
             $classes = get_declared_classes();
         }
-
 
         $whiteListedClasses = $classes;
         $blackListedClasses = [
@@ -341,8 +365,7 @@ class ConfigController extends AdminController
             '/^PHPExcel_/i',
         ];
 
-
-        $additionalBlacklisted = $config["classes"]["blacklist"];
+        $additionalBlacklisted = $config['classes']['blacklist'];
         if (!empty($additionalBlacklisted)) {
             foreach ($additionalBlacklisted as $line) {
                 if ($line) {
@@ -357,40 +380,37 @@ class ConfigController extends AdminController
         return $whiteListedClasses;
     }
 
-
     /**
      * @Route("/get-classes")
+     *
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function getClassesAction(Request $request)
     {
-
         $classes = $this->loadClasses();
 
-        if ($request->get("type") == "attribute-cluster-interpreter") {
-
-            $implementsIConfig = array();
+        if ($request->get('type') == 'attribute-cluster-interpreter') {
+            $implementsIConfig = [];
             foreach ($classes as $class) {
                 try {
                     $reflect = new \ReflectionClass($class);
                     if (is_subclass_of(
                             $class,
-                            "\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\AttributeClusterInterpreter\\AbstractAttributeClusterInterpreter"
+                            '\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\AttributeClusterInterpreter\\AbstractAttributeClusterInterpreter'
                         ) && $reflect->isInstantiable()
                     ) {
-                        $implementsIConfig[] = array($class);
+                        $implementsIConfig[] = [$class];
                     }
                 } catch (Exception $e) {
                 }
             }
 
             return $this->json($implementsIConfig);
-
         } else {
-            if ($request->get("type") == "export-filter") {
-
-                $implementsIConfig = array();
+            if ($request->get('type') == 'export-filter') {
+                $implementsIConfig = [];
                 foreach ($classes as $class) {
                     try {
                         $reflect = new \ReflectionClass($class);
@@ -398,18 +418,16 @@ class ConfigController extends AdminController
                                 '\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\IFilter'
                             ) && $reflect->isInstantiable()
                         ) {
-                            $implementsIConfig[] = array($class);
+                            $implementsIConfig[] = [$class];
                         }
                     } catch (Exception $e) {
                     }
                 }
 
                 return $this->json($implementsIConfig);
-
             } else {
-                if ($request->get("type") == "export-conditionmodificator") {
-
-                    $implementsIConfig = array();
+                if ($request->get('type') == 'export-conditionmodificator') {
+                    $implementsIConfig = [];
                     foreach ($classes as $class) {
                         try {
                             $reflect = new \ReflectionClass($class);
@@ -417,18 +435,16 @@ class ConfigController extends AdminController
                                     '\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\IConditionModificator'
                                 ) && $reflect->isInstantiable()
                             ) {
-                                $implementsIConfig[] = array($class);
+                                $implementsIConfig[] = [$class];
                             }
                         } catch (Exception $e) {
                         }
                     }
 
                     return $this->json($implementsIConfig);
-
                 } else {
-                    if ($request->get("type") == "attribute-getter") {
-
-                        $implementsIConfig = array();
+                    if ($request->get('type') == 'attribute-getter') {
+                        $implementsIConfig = [];
                         foreach ($classes as $class) {
                             try {
                                 $reflect = new \ReflectionClass($class);
@@ -436,18 +452,16 @@ class ConfigController extends AdminController
                                         '\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\IGetter'
                                     ) && $reflect->isInstantiable()
                                 ) {
-                                    $implementsIConfig[] = array($class);
+                                    $implementsIConfig[] = [$class];
                                 }
                             } catch (Exception $e) {
                             }
                         }
 
                         return $this->json($implementsIConfig);
-
                     } else {
-                        if ($request->get("type") == "attribute-interpreter") {
-
-                            $implementsIConfig = array();
+                        if ($request->get('type') == 'attribute-interpreter') {
+                            $implementsIConfig = [];
                             foreach ($classes as $class) {
                                 try {
                                     $reflect = new \ReflectionClass($class);
@@ -455,16 +469,15 @@ class ConfigController extends AdminController
                                             '\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\IInterpreter'
                                         ) && $reflect->isInstantiable()
                                     ) {
-                                        $implementsIConfig[] = array($class);
+                                        $implementsIConfig[] = [$class];
                                     }
                                 } catch (Exception $e) {
                                 }
                             }
 
                             return $this->json($implementsIConfig);
-
                         } else {
-                            throw new Exception("unknown class type");
+                            throw new Exception('unknown class type');
                         }
                     }
                 }
@@ -474,75 +487,77 @@ class ConfigController extends AdminController
 
     /**
      * @Route("/clear-cache")
+     *
      * @param Request $request
+     *
      * @return Response
      */
-    public function clearCacheAction() {
+    public function clearCacheAction()
+    {
+        Cache::clearTag('exporttoolkit');
 
-        Cache::clearTag("exporttoolkit");
         return new Response();
-
     }
-
 
     protected function getCliCommand($configName)
     {
         return \Pimcore\Tool\Console::getPhpCli(
-            )." ".PIMCORE_PROJECT_ROOT.'/bin/console export-toolkit:export --config-name="'.$configName.'"';
+            ).' '.PIMCORE_PROJECT_ROOT.'/bin/console export-toolkit:export --config-name="'.$configName.'"';
     }
 
     /**
      * @Route("/execute-export")
+     *
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function executeExportAction(Request $request)
     {
-
-        $workername = $request->get("name");
+        $workername = $request->get('name');
         $config = Dao::getByName($workername);
 
         if ($config && $config->configuration->general->executor) {
-            /** @var  $className IExecutor */
+            /** @var $className IExecutor */
             $className = $config->configuration->general->executor;
             try {
                 $className::execute($workername, null);
             } catch (Exception $e) {
-                return $this->json(["success" => false, "message" => $e->getMessage()]);
+                return $this->json(['success' => false, 'message' => $e->getMessage()]);
             }
         } else {
-            $lockkey = "exporttoolkit_".$workername;
+            $lockkey = 'exporttoolkit_'.$workername;
             if (\Pimcore\Model\Tool\Lock::isLocked($lockkey, 3 * 60 * 60)) { //lock for 3h
-                return $this->json(["success" => false]);
+                return $this->json(['success' => false]);
             }
 
             $cmd = $this->getCliCommand($workername);
             Logger::info($cmd);
             \Pimcore\Tool\Console::execInBackground(
                 $cmd,
-                PIMCORE_LOG_DIRECTORY.DIRECTORY_SEPARATOR."exporttoolkit-output.log"
+                PIMCORE_LOG_DIRECTORY.DIRECTORY_SEPARATOR.'exporttoolkit-output.log'
             );
         }
 
-        return $this->json(["success" => true]);
+        return $this->json(['success' => true]);
     }
-
 
     /**
      * @Route("/is-export-running")
+     *
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function isExportRunningAction(Request $request)
     {
-        $workername = $request->get("name");
-        $lockkey = "exporttoolkit_".$workername;
+        $workername = $request->get('name');
+        $lockkey = 'exporttoolkit_'.$workername;
 
         if (\Pimcore\Model\Tool\Lock::isLocked($lockkey, 3 * 60 * 60)) { //lock for 3h
-            return $this->json(["success" => true, "locked" => true]);
+            return $this->json(['success' => true, 'locked' => true]);
         } else {
-            return $this->json(["success" => true, "locked" => false]);
+            return $this->json(['success' => true, 'locked' => false]);
         }
     }
-
 }
