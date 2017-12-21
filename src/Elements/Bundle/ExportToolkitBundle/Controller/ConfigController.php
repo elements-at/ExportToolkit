@@ -112,7 +112,7 @@ class ConfigController extends AdminController
             }
         }
 
-        return $this->json($tree);
+        return $this->adminJson($tree);
     }
 
     /**
@@ -134,9 +134,9 @@ class ConfigController extends AdminController
 
             $config->delete();
 
-            return $this->json(['success' => true]);
+            return $this->adminJson(['success' => true]);
         } catch (Exception $e) {
-            return $this->json(['success' => false, 'message' => $e->getMessage()]);
+            return $this->adminJson(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
@@ -159,9 +159,9 @@ class ConfigController extends AdminController
 
             Dao::addFolder($parent, $name);
 
-            return $this->json(['success' => true]);
+            return $this->adminJson(['success' => true]);
         } catch (Exception $exception) {
-            return $this->json(['success' => false, 'message' => $exception->getMessage()]);
+            return $this->adminJson(['success' => false, 'message' => $exception->getMessage()]);
         }
     }
 
@@ -179,9 +179,9 @@ class ConfigController extends AdminController
         if (Dao::getFolderByPath($path)) {
             Dao::deleteFolder($path);
 
-            return $this->json(['success' => true]);
+            return $this->adminJson(['success' => true]);
         } else {
-            return $this->json(['success' => false]);
+            return $this->adminJson(['success' => false]);
         }
     }
 
@@ -241,9 +241,9 @@ class ConfigController extends AdminController
             $config = new Configuration($path, $name);
             $config->save();
 
-            return $this->json(['success' => true, 'name' => $name]);
+            return $this->adminJson(['success' => true, 'name' => $name]);
         } catch (Exception $e) {
-            return $this->json(['success' => false, 'message' => $e->getMessage()]);
+            return $this->adminJson(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
@@ -273,9 +273,9 @@ class ConfigController extends AdminController
             $originalConfig->setName($name);
             $originalConfig->save($name);
 
-            return $this->json(['success' => true, 'name' => $name]);
+            return $this->adminJson(['success' => true, 'name' => $name]);
         } catch (Exception $e) {
-            return $this->json(['success' => false, 'message' => $e->getMessage()]);
+            return $this->adminJson(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
@@ -303,7 +303,7 @@ class ConfigController extends AdminController
             $cli = $this->getCliCommand($configuration->getName());
         }
 
-        return $this->json(
+        return $this->adminJson(
             [
                 'name' => $configuration->getName(),
                 'execute' => $cli,
@@ -330,9 +330,9 @@ class ConfigController extends AdminController
             $config->setConfiguration($dataDecoded);
             $config->save();
 
-            return $this->json(['success' => true]);
+            return $this->adminJson(['success' => true]);
         } catch (Exception $e) {
-            return $this->json(['success' => false, 'message' => $e->getMessage()]);
+            return $this->adminJson(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
@@ -407,7 +407,7 @@ class ConfigController extends AdminController
                 }
             }
 
-            return $this->json($implementsIConfig);
+            return $this->adminJson($implementsIConfig);
         } else {
             if ($request->get('type') == 'export-filter') {
                 $implementsIConfig = [];
@@ -424,7 +424,7 @@ class ConfigController extends AdminController
                     }
                 }
 
-                return $this->json($implementsIConfig);
+                return $this->adminJson($implementsIConfig);
             } else {
                 if ($request->get('type') == 'export-conditionmodificator') {
                     $implementsIConfig = [];
@@ -441,7 +441,7 @@ class ConfigController extends AdminController
                         }
                     }
 
-                    return $this->json($implementsIConfig);
+                    return $this->adminJson($implementsIConfig);
                 } else {
                     if ($request->get('type') == 'attribute-getter') {
                         $implementsIConfig = [];
@@ -458,7 +458,7 @@ class ConfigController extends AdminController
                             }
                         }
 
-                        return $this->json($implementsIConfig);
+                        return $this->adminJson($implementsIConfig);
                     } else {
                         if ($request->get('type') == 'attribute-interpreter') {
                             $implementsIConfig = [];
@@ -475,7 +475,7 @@ class ConfigController extends AdminController
                                 }
                             }
 
-                            return $this->json($implementsIConfig);
+                            return $this->adminJson($implementsIConfig);
                         } else {
                             throw new Exception('unknown class type');
                         }
@@ -523,12 +523,12 @@ class ConfigController extends AdminController
             try {
                 $className::execute($workername, null);
             } catch (Exception $e) {
-                return $this->json(['success' => false, 'message' => $e->getMessage()]);
+                return $this->adminJson(['success' => false, 'message' => $e->getMessage()]);
             }
         } else {
             $lockkey = 'exporttoolkit_'.$workername;
             if (\Pimcore\Model\Tool\Lock::isLocked($lockkey, 3 * 60 * 60)) { //lock for 3h
-                return $this->json(['success' => false]);
+                return $this->adminJson(['success' => false]);
             }
 
             $cmd = $this->getCliCommand($workername);
@@ -539,7 +539,7 @@ class ConfigController extends AdminController
             );
         }
 
-        return $this->json(['success' => true]);
+        return $this->adminJson(['success' => true]);
     }
 
     /**
@@ -555,9 +555,9 @@ class ConfigController extends AdminController
         $lockkey = 'exporttoolkit_'.$workername;
 
         if (\Pimcore\Model\Tool\Lock::isLocked($lockkey, 3 * 60 * 60)) { //lock for 3h
-            return $this->json(['success' => true, 'locked' => true]);
+            return $this->adminJson(['success' => true, 'locked' => true]);
         } else {
-            return $this->json(['success' => true, 'locked' => false]);
+            return $this->adminJson(['success' => true, 'locked' => false]);
         }
     }
 }
