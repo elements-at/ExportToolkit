@@ -19,7 +19,7 @@ use Elements\Bundle\ExportToolkitBundle\ExportService\Worker;
 use Elements\Bundle\ProcessManagerBundle\ExecutionTrait;
 use Pimcore\Log\Simple;
 use Pimcore\Logger;
-use Pimcore\Model\Object\AbstractObject;
+use Pimcore\Model\DataObject\AbstractObject;
 
 class ExportService
 {
