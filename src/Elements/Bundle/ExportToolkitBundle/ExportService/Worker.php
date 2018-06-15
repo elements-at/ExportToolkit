@@ -21,7 +21,6 @@ use Elements\Bundle\ExportToolkitBundle\ExportService\Filter\DefaultFilter;
 use Elements\Bundle\ExportToolkitBundle\Traits\LoggerAwareTrait;
 use Pimcore\Log\ApplicationLogger;
 use Pimcore\Logger;
-use Pimcore\Model\Object;
 use Pimcore\Model\Object\AbstractObject;
 use Pimcore\Model\Object\Localizedfield;
 use Psr\Log\LoggerInterface;
