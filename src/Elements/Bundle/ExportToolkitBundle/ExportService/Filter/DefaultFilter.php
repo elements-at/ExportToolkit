@@ -16,7 +16,7 @@
 namespace Elements\Bundle\ExportToolkitBundle\ExportService\Filter;
 
 use Elements\Bundle\ExportToolkitBundle\ExportService\IFilter;
-use Pimcore\Model\Object\AbstractObject;
+use Pimcore\Model\DataObject\AbstractObject;
 
 class DefaultFilter implements IFilter
 {

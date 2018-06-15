@@ -15,7 +15,7 @@
 
 namespace Elements\Bundle\ExportToolkitBundle\ExportService\AttributeClusterInterpreter;
 
-use Pimcore\Model\Object\AbstractObject;
+use Pimcore\Model\DataObject\AbstractObject;
 
 class DefaultJson extends AbstractAttributeClusterInterpreter
 {

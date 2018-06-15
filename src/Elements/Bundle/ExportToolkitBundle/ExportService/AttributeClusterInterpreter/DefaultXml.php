@@ -16,7 +16,7 @@
 namespace Elements\Bundle\ExportToolkitBundle\ExportService\AttributeClusterInterpreter;
 
 use Elements\Bundle\ExportToolkitBundle\SimpleXMLExtended;
-use Pimcore\Model\Object\AbstractObject;
+use Pimcore\Model\DataObject\AbstractObject;
 
 class DefaultXml extends AbstractAttributeClusterInterpreter
 {

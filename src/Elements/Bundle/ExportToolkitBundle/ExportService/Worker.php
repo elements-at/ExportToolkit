@@ -21,8 +21,10 @@ use Elements\Bundle\ExportToolkitBundle\ExportService\Filter\DefaultFilter;
 use Elements\Bundle\ExportToolkitBundle\Traits\LoggerAwareTrait;
 use Pimcore\Log\ApplicationLogger;
 use Pimcore\Logger;
-use Pimcore\Model\Object\AbstractObject;
-use Pimcore\Model\Object\Localizedfield;
+use Pimcore\Model\DataObject\AbstractObject;
+use Pimcore\Model\DataObject\ClassDefinition;
+use Pimcore\Model\DataObject\Concrete;
+use Pimcore\Model\DataObject\Localizedfield;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -58,10 +60,10 @@ class Worker
         $classId = trim($workerConfig->getConfiguration()->general->pimcoreClass);
 
         if ($classId) {
-            $class = \Pimcore\Model\Object\ClassDefinition::getById($classId);
-            $this->pimcoreClass = trim('\\Pimcore\\Model\\Object\\' . ucfirst($class->getName()));
+            $class = ClassDefinition::getById($classId);
+            $this->pimcoreClass = trim('\\Pimcore\\Model\\DataObject\\' . ucfirst($class->getName()));
         } else {
-            $this->pimcoreClass = '\\Pimcore\\Model\\Object\\AbstractObject';
+            $this->pimcoreClass = '\\Pimcore\\Model\\DataObject\\AbstractObject';
         }
 
         $workerConfigClassName = trim($workerConfig->getConfiguration()->general->filterClass);
@@ -222,30 +224,30 @@ class Worker
     }
 
     /**
-     * @return \Pimcore\Model\Object\Listing\Concrete
+     * @return \Pimcore\Model\DataObject\Listing\Concrete
      */
     public function getObjectList()
     {
         if ($this->pimcoreClass == 'Object_Abstract' || $this->pimcoreClass == 'AbstractObject'
-                    || $this->pimcoreClass == '\\Pimcore\\Model\\Object\\AbstractObject') {
-            $listClassName = '\\Pimcore\\Model\\Object\\Listing';
+                    || $this->pimcoreClass == '\\Pimcore\\Model\\DataObject\\AbstractObject') {
+            $listClassName = '\\Pimcore\\Model\\DataObject\\Listing';
         } else {
             $listClassName = $this->pimcoreClass . '\\Listing';
         }
 
         /**
-         * @var $objects \Pimcore\Model\Object\Listing\Concrete|\Pimcore\Model\Object\Listing\Dao
+         * @var $objects \Pimcore\Model\DataObject\Listing\Concrete|\Pimcore\Model\DataObject\Listing\Dao
          */
         $objects = new $listClassName();
         $objects->setUnpublished(true);
         $objects->setObjectTypes(['object', 'folder', 'variant']);
         if ($this->workerConfig->getConfiguration()->general->queryLanguage) {
             $objects->setLocale($this->workerConfig->getConfiguration()->general->queryLanguage);
-            if ($objects instanceof \Pimcore\Model\Object\Listing\Concrete) {
+            if ($objects instanceof Concrete) {
                 $objects->setIgnoreLocalizedFields(false);
             }
         } else {
-            if ($objects instanceof \Pimcore\Model\Object\Listing\Concrete) {
+            if ($objects instanceof Concrete) {
                 $objects->setIgnoreLocalizedFields(true);
             }
         }

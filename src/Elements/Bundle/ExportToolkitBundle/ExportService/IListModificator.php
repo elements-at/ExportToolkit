@@ -15,7 +15,7 @@
 
 namespace Elements\Bundle\ExportToolkitBundle\ExportService;
 
-use Pimcore\Model\Object\Listing;
+use Pimcore\Model\DataObject\Listing;
 
 interface IListModificator
 {

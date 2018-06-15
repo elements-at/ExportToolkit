@@ -16,7 +16,7 @@
 namespace Elements\Bundle\ExportToolkitBundle\ExportService\AttributeClusterInterpreter;
 
 use Elements\Bundle\ExportToolkitBundle\Traits\LoggerAwareTrait;
-use Pimcore\Model\Object\AbstractObject;
+use Pimcore\Model\DataObject\AbstractObject;
 use Psr\Log\NullLogger;
 
 abstract class AbstractAttributeClusterInterpreter
