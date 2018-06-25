@@ -2,10 +2,8 @@
   "name": "elements/export-toolkit-bundle",
   "type": "pimcore-bundle",
   "require": {
-      "pimcore/core-version": "^5.1.0"
-  },
-  "suggest": {
-    "elements/process-manager-bundle": "~1.0"
+      "pimcore/core-version": "^5.1.0",
+      "elements/process-manager-bundle": "~2.2"
   },
   "autoload": {
     "psr-4": {
