@@ -2,7 +2,7 @@
   "name": "elements/export-toolkit-bundle",
   "type": "pimcore-bundle",
   "require": {
-      "pimcore/core-version": "^5.1.0",
+      "pimcore/core-version": ">=5.2.0 <5.4",
       "elements/process-manager-bundle": "~2.2"
   },
   "autoload": {
