@@ -4,18 +4,6 @@ Base of each export is an export configuration which is described below.
 
 ![export-toolkit](/src/Elements/Bundle/ExportToolkitBundle/doc/images/export-toolkit.png)
 
-## Migration notes from Pimcore 4 to 5
-
-* migrate the config format to version 2.0 (see migrate-2.0.php)
-* move the plugin's configuration file from website/var/plugins/ExportToolkit to 
-            var/config/ExportToolkit/config.php
-* Please note that the namespaces have been changed!!!
-** Change ExportToolkit\* to Elements\Bundle\ExportToolkitBundle\*
-** This also affects your export configurations. Check export-toolkit-configurations.php
-* Be aware that this also affects your custom implementations (interpreters, getters and so so on). So you might have to change code. 
-* adapt your crontab 
-* The default output directory also has changed (used every time you don't specify a output file) to var/tmp/ExportToolkit
-
 ### Export Configuration
 
 An export configuration is a container to configure a specific export of pimcore objects.
@@ -123,8 +111,22 @@ Each attribute cluster has one or more attributes. An attribute is one data entr
    * translator: possible values are admin or website for using admin or website translations to translate the value
    
   
+## Running with Pimcore < 5.4
+With Pimcore 5.4 the location of static Pimcore files like icons has changed. In order to make this bundle work 
+with Pimcore < 5.4, please add following rewrite rule to your `.htaccess`.
+```
+    # rewrite rule for pre pimcore 5.4 core static files
+    RewriteRule ^bundles/pimcoreadmin/(.*) /pimcore/static6/$1 [PT,L]
+``` 
 
+## Migration notes from Pimcore 4 to 5
 
-
-
-
+* migrate the config format to version 2.0 (see migrate-2.0.php)
+* move the plugin's configuration file from website/var/plugins/ExportToolkit to 
+            var/config/ExportToolkit/config.php
+* Please note that the namespaces have been changed!!!
+** Change ExportToolkit\* to Elements\Bundle\ExportToolkitBundle\*
+** This also affects your export configurations. Check export-toolkit-configurations.php
+* Be aware that this also affects your custom implementations (interpreters, getters and so so on). So you might have to change code. 
+* adapt your crontab 
+* The default output directory also has changed (used every time you don't specify a output file) to var/tmp/ExportToolkit

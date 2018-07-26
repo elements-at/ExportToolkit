@@ -393,7 +393,7 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
             items: [
                 {
                     tooltip: t('plugin_exporttoolkit_configpanel_item_attributeAdvanced'),
-                    icon: "/pimcore/static6/img/icon/cog_edit.png",
+                    icon: "/bundles/pimcoreadmin/img/icon/cog_edit.png",
                     handler: function (grid, rowIndex) {
                         var data = grid.getStore().getAt(rowIndex);
                         var dialog = new pimcore.plugin.exporttoolkit.config.AttributeConfig(this.updateData, data, grid);
@@ -409,7 +409,7 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
             items: [
                 {
                     tooltip: t('up'),
-                    icon: "/pimcore/static6/img/icon/arrow_up.png",
+                    icon: "/bundles/pimcoreadmin/img/icon/arrow_up.png",
                     handler: function (grid, rowIndex) {
                         if(rowIndex > 0) {
                             var rec = grid.getStore().getAt(rowIndex);
@@ -426,7 +426,7 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
             items: [
                 {
                     tooltip: t('down'),
-                    icon: "/pimcore/static6/img/icon/arrow_down.png",
+                    icon: "/bundles/pimcoreadmin/img/icon/arrow_down.png",
                     handler: function (grid, rowIndex) {
                         if(rowIndex < (grid.getStore().getCount()-1)) {
                             var rec = grid.getStore().getAt(rowIndex);
@@ -444,7 +444,7 @@ pimcore.plugin.exporttoolkit.config.Item = Class.create(pimcore.element.abstract
             items: [
                 {
                     tooltip: t('remove'),
-                    icon: "/pimcore/static6/img/icon/cross.png",
+                    icon: "/bundles/pimcoreadmin/img/icon/cross.png",
                     handler: function (grid, rowIndex) {
                         grid.getStore().removeAt(rowIndex);
                     }.bind(this)
