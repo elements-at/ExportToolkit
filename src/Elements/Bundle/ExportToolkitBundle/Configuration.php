@@ -15,6 +15,7 @@
 
 namespace Elements\Bundle\ExportToolkitBundle;
 
+use Elements\Bundle\ExportToolkitBundle\Configuration\Dao;
 use Pimcore\Model\AbstractModel;
 
 class Configuration extends AbstractModel
@@ -105,5 +106,13 @@ class Configuration extends AbstractModel
     public static function getList() {
         $config = new self(null);
         return $config->getDao()->getList();
+    }
+
+    /**
+     * @param $name
+     * @return Configuration
+     */
+    public static function getByName($name) {
+        return Dao::getByName($name);
     }
 }
