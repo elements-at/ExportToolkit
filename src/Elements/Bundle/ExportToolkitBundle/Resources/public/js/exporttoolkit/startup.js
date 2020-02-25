@@ -52,7 +52,7 @@ pimcore.plugin.ExportToolkit = Class.create(pimcore.plugin.admin, {
                 this.navEl = Ext.get(
                     searchButton.insertHtml(
                         "afterEnd",
-                        '<li id="pimcore_menu_exporttoolkit" data-menu-tooltip="Export Toolkit" class="pimcore_menu_item icon-upload">' + t('plugin_exporttoolkit_mainmenu') + '</li>'
+                        '<li id="pimcore_menu_exporttoolkit" data-menu-tooltip="Export Toolkit" class="pimcore_menu_item icon-upload"><img src="/bundles/pimcoreadmin/img/flat-white-icons/right.svg"></li>'
                     )
                 );
 

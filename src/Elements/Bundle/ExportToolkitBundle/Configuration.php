@@ -101,4 +101,9 @@ class Configuration extends AbstractModel
     {
         $this->getDao()->delete();
     }
+
+    public static function getList() {
+        $config = new self(null);
+        return $config->getDao()->getList();
+    }
 }
