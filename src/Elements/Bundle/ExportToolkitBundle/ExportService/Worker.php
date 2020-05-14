@@ -184,7 +184,7 @@ class Worker
 
                             $clusterInterpreter->setData($object, $name, $value);
                         } catch (\Exception $e) {
-                            Logger::err('Exception in ExportService: ' . $e->getMessage(), $e);
+                            Logger::err('Exception in ExportService: ' . $e->getMessage());
                         }
                     }
                 }
