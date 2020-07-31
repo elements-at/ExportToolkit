@@ -1,4 +1,8 @@
 services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
     exporttoolkit.event_listener:
         class: Elements\Bundle\ExportToolkitBundle\EventListener\ExportListener
 #        lazy: true
@@ -10,3 +14,6 @@ services:
 
     exporttoolkit.exportservice:
         class: Elements\Bundle\ExportToolkitBundle\ExportService
+
+    Elements\Bundle\ExportToolkitBundle\Command\:
+        resource: '../../Command'
