@@ -48,7 +48,6 @@ class DefaultXml extends AbstractAttributeClusterInterpreter
     {
         $xml = $this->createXml($this->data);
         file_put_contents($this->getExportFile(), $xml);
-        die('committed');
     }
 
     public function deleteFromExport(AbstractObject $object)
