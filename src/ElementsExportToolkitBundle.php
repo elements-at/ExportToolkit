@@ -21,7 +21,7 @@ use Pimcore\Extension\Bundle\Installer\InstallerInterface;
 class ElementsExportToolkitBundle extends AbstractPimcoreBundle
 {
 
-    const BUNDLE_NAME = 'ExportToolkitBundle';
+    const BUNDLE_NAME = 'ElementsExportToolkitBundle';
 
     public function getCssPaths() :array
     {
