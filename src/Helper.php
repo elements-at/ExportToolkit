@@ -16,6 +16,9 @@
 namespace Elements\Bundle\ExportToolkitBundle;
 
 use Pimcore\Config;
+use Symfony\Component\Lock\Key;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Lock\LockInterface;
 
 class Helper
 {
@@ -58,4 +61,11 @@ class Helper
 
         return self::$_pluginConfig;
     }
+
+    public static function getLock(LockFactory $lockFactory, string $workername): LockInterface
+    {
+        $lockkey = new Key('exporttoolkit_'.$workername);
+        return $lockFactory->createLock($lockkey, 3 * 60 * 60);
+    }
+
 }

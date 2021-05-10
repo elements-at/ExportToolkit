@@ -26,11 +26,13 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/admin/elementsexporttoolkit/config')]
 class ConfigController extends AdminController
 {
+
     public function upgradeAction()
     {
         Helper::upgrade();
@@ -467,7 +469,7 @@ class ConfigController extends AdminController
      *
      * @return JsonResponse
      */
-    public function executeExportAction(Request $request)
+    public function executeExportAction(Request $request,  LockFactory $lockFactory)
     {
         $workername = $request->get('name');
         $config = Dao::getByName($workername);
@@ -481,8 +483,8 @@ class ConfigController extends AdminController
                 return $this->adminJson(['success' => false, 'message' => $e->getMessage()]);
             }
         } else {
-            $lockkey = 'exporttoolkit_'.$workername;
-            if (\Pimcore\Model\Tool\Lock::isLocked($lockkey, 3 * 60 * 60)) { //lock for 3h
+
+            if ($this->isProcessRunning($lockFactory,$workername)) {
                 return $this->adminJson(['success' => false]);
             }
 
@@ -498,15 +500,18 @@ class ConfigController extends AdminController
     }
 
     #[Route('/is-export-running')]
-    public function isExportRunningAction(Request $request) :JsonResponse
+    public function isExportRunningAction(Request $request, LockFactory $lockFactory) :JsonResponse
     {
-        $workername = $request->get('name');
-        $lockkey = 'exporttoolkit_'.$workername;
+        return $this->adminJson(['success' => true, 'locked' => $this->isProcessRunning($lockFactory,$request->get('name'))]);
 
-        if (\Pimcore\Model\Tool\Lock::isLocked($lockkey, 3 * 60 * 60)) { //lock for 3h
-            return $this->adminJson(['success' => true, 'locked' => true]);
-        } else {
-            return $this->adminJson(['success' => true, 'locked' => false]);
-        }
+    }
+
+    protected function isProcessRunning(LockFactory $lockFactory, string $workername): bool
+    {
+        $lock = Helper::getLock($lockFactory, $workername);
+        $acquired = $lock->acquire();
+        $lock->release();
+
+        return !$acquired;
     }
 }
