@@ -390,7 +390,11 @@ class ConfigController extends AdminController
                             $reflect = new \ReflectionClass($class);
                             if ($reflect->implementsInterface(
                                     '\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\IConditionModificator'
-                                ) && $reflect->isInstantiable()
+                                )
+                                ||
+                                $reflect->implementsInterface(
+                                    '\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\IListModificator'
+                                )
                             ) {
                                 $implementsIConfig[] = [$class];
                             }
