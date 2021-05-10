@@ -22,28 +22,16 @@ use Symfony\Component\Lock\LockInterface;
 
 class Helper
 {
-    /**
-     * @var \Zend_Config $_pluginConfig
-     */
-    private static $_pluginConfig;
 
-    /**
-     * get the path to the plugin configuration file.
-     *
-     * @return string
-     *  path to config
-     */
-    public static function getConfigFilePath()
+    private static array $_pluginConfig = [];
+
+    public static function getConfigFilePath() :string
     {
         return Config::locateConfigFile('ExportToolkit/config.php');
     }
 
-    /**
-     * get the plugin configuration.
-     *
-     * @return \Zend_Config
-     */
-    public static function getPluginConfig()
+
+    public static function getPluginConfig() :array
     {
         if (self::$_pluginConfig) {
             return self::$_pluginConfig;
