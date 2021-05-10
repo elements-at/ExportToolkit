@@ -136,7 +136,7 @@ class ExportService
             $objects->setLimit($pageSize);
 
             $items = $objects->load();
-            $monitoringItem->setCurrentWorkload(($offset) ?: 1)->setDefaultProcessMessage($items[0] ? $items[0]->getClassName() : 'Items')->save();
+            $monitoringItem->setCurrentWorkload(($offset) ?: 1)->setDefaultProcessMessage(isset($items[0]) ? $items[0]->getClassName() : 'Items')->save();
             foreach ($items as $object) {
                 Simple::log('export-toolkit-' . $workerName, 'Updating object ' . $object->getId());
 

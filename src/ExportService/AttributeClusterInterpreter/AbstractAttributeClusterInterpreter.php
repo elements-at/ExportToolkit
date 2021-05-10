@@ -51,7 +51,7 @@ abstract class AbstractAttributeClusterInterpreter
      */
     public function setData(AbstractObject $object, $key, $value)
     {
-        $rowData = $this->data[$object->getId()];
+        $rowData = $this->data[$object->getId()]?? [];
         $rowData[$key] = $value;
         $this->data[$object->getId()] = $rowData;
     }
