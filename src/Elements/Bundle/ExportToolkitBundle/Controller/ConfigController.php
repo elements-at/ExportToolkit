@@ -431,8 +431,14 @@ class ConfigController extends AdminController
                     foreach ($classes as $class) {
                         try {
                             $reflect = new \ReflectionClass($class);
-                            if ($reflect->implementsInterface(
-                                    '\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\IConditionModificator'
+                            if ((
+                                    $reflect->implementsInterface(
+                                        '\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\IConditionModificator'
+                                    )
+                                    ||
+                                    $reflect->implementsInterface(
+                                        '\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\IListModificator'
+                                    )
                                 ) && $reflect->isInstantiable()
                             ) {
                                 $implementsIConfig[] = [$class];
