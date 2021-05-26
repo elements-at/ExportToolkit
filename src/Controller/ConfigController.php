@@ -26,13 +26,13 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route("/admin/elementsexporttoolkit/config")
- */
+#[Route('/admin/elementsexporttoolkit/config')]
 class ConfigController extends AdminController
 {
+
     public function upgradeAction()
     {
         Helper::upgrade();
@@ -63,14 +63,8 @@ class ConfigController extends AdminController
         ];
     }
 
-    /**
-     * @Route("/list")
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function listAction(Request $request)
+    #[Route('/list')]
+    public function listAction(Request $request):JsonResponse
     {
         $folders = Dao::getFolders();
         $list = Dao::getList();
@@ -115,14 +109,8 @@ class ConfigController extends AdminController
         return $this->adminJson($tree);
     }
 
-    /**
-     * @Route("/delete")
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function deleteAction(Request $request)
+    #[Route('/delete')]
+    public function deleteAction(Request $request) :JsonResponse
     {
         try {
             $name = $request->get('name');
@@ -219,14 +207,8 @@ class ConfigController extends AdminController
         return new JsonResponse();
     }
 
-    /**
-     * @Route("/add")
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function addAction(Request $request)
+    #[Route('/add')]
+    public function addAction(Request $request): JsonResponse
     {
         try {
             $path = $request->get('path');
@@ -247,14 +229,9 @@ class ConfigController extends AdminController
         }
     }
 
-    /**
-     * @Route("/clone")
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function cloneAction(Request $request)
+
+    #[Route('/clone')]
+    public function cloneAction(Request $request): JsonResponse
     {
         try {
             $name = $request->get('name');
@@ -279,14 +256,8 @@ class ConfigController extends AdminController
         }
     }
 
-    /**
-     * @Route("/get")
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function getAction(Request $request)
+    #[Route('/get')]
+    public function getAction(Request $request): JsonResponse
     {
         $name = $request->get('name');
 
@@ -295,7 +266,7 @@ class ConfigController extends AdminController
             throw new Exception('Name does not exist.');
         }
 
-        if ($configuration && $configuration->configuration->general->executor) {
+        if ($configuration && isset($configuration->configuration->general->executor)) {
             /** @var $className IExecutor */
             $className = $configuration->configuration->general->executor;
             $cli = $className::getCli($name, null);
@@ -312,14 +283,8 @@ class ConfigController extends AdminController
         );
     }
 
-    /**
-     * @Route("/save")
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function saveAction(Request $request)
+    #[Route('/save')]
+    public function saveAction(Request $request): JsonResponse
     {
         try {
             $data = $request->get('data');
@@ -336,7 +301,7 @@ class ConfigController extends AdminController
         }
     }
 
-    private function loadClasses()
+    private function loadClasses(): array|false
     {
         $config = Helper::getPluginConfig();
 
@@ -380,14 +345,8 @@ class ConfigController extends AdminController
         return $whiteListedClasses;
     }
 
-    /**
-     * @Route("/get-classes")
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function getClassesAction(Request $request)
+    #[Route('/get-classes')]
+    public function getClassesAction(Request $request): JsonResponse
     {
         $classes = $this->loadClasses();
 
@@ -431,15 +390,13 @@ class ConfigController extends AdminController
                     foreach ($classes as $class) {
                         try {
                             $reflect = new \ReflectionClass($class);
-                            if ((
-                                    $reflect->implementsInterface(
-                                        '\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\IConditionModificator'
-                                    )
-                                    ||
-                                    $reflect->implementsInterface(
-                                        '\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\IListModificator'
-                                    )
-                                ) && $reflect->isInstantiable()
+                            if ($reflect->implementsInterface(
+                                    '\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\IConditionModificator'
+                                )
+                                ||
+                                $reflect->implementsInterface(
+                                    '\\Elements\\Bundle\\ExportToolkitBundle\\ExportService\\IListModificator'
+                                )
                             ) {
                                 $implementsIConfig[] = [$class];
                             }
@@ -491,14 +448,8 @@ class ConfigController extends AdminController
         }
     }
 
-    /**
-     * @Route("/clear-cache")
-     *
-     * @param Request $request
-     *
-     * @return Response
-     */
-    public function clearCacheAction()
+    #[Route('/clear-cache')]
+    public function clearCacheAction(): Response
     {
         Cache::clearTag('exporttoolkit');
 
@@ -518,7 +469,7 @@ class ConfigController extends AdminController
      *
      * @return JsonResponse
      */
-    public function executeExportAction(Request $request)
+    public function executeExportAction(Request $request,  LockFactory $lockFactory)
     {
         $workername = $request->get('name');
         $config = Dao::getByName($workername);
@@ -532,8 +483,8 @@ class ConfigController extends AdminController
                 return $this->adminJson(['success' => false, 'message' => $e->getMessage()]);
             }
         } else {
-            $lockkey = 'exporttoolkit_'.$workername;
-            if (\Pimcore\Model\Tool\Lock::isLocked($lockkey, 3 * 60 * 60)) { //lock for 3h
+
+            if ($this->isProcessRunning($lockFactory,$workername)) {
                 return $this->adminJson(['success' => false]);
             }
 
@@ -548,22 +499,19 @@ class ConfigController extends AdminController
         return $this->adminJson(['success' => true]);
     }
 
-    /**
-     * @Route("/is-export-running")
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function isExportRunningAction(Request $request)
+    #[Route('/is-export-running')]
+    public function isExportRunningAction(Request $request, LockFactory $lockFactory) :JsonResponse
     {
-        $workername = $request->get('name');
-        $lockkey = 'exporttoolkit_'.$workername;
+        return $this->adminJson(['success' => true, 'locked' => $this->isProcessRunning($lockFactory,$request->get('name'))]);
 
-        if (\Pimcore\Model\Tool\Lock::isLocked($lockkey, 3 * 60 * 60)) { //lock for 3h
-            return $this->adminJson(['success' => true, 'locked' => true]);
-        } else {
-            return $this->adminJson(['success' => true, 'locked' => false]);
-        }
+    }
+
+    protected function isProcessRunning(LockFactory $lockFactory, string $workername): bool
+    {
+        $lock = Helper::getLock($lockFactory, $workername);
+        $acquired = $lock->acquire();
+        $lock->release();
+
+        return !$acquired;
     }
 }

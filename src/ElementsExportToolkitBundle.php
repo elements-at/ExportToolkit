@@ -20,27 +20,24 @@ use Pimcore\Extension\Bundle\Installer\InstallerInterface;
 
 class ElementsExportToolkitBundle extends AbstractPimcoreBundle
 {
-    /**
-     * @return array
-     */
-    public function getCssPaths()
+
+    const BUNDLE_NAME = 'ElementsExportToolkitBundle';
+
+    public function getCssPaths() :array
     {
         return [
             '/bundles/elementsexporttoolkit/css/example.css'
         ];
     }
 
-    /**
-     * @return array
-     */
-    public function getJsPaths()
+    public function getJsPaths() :array
     {
         return [
-            '/bundles/elementsexporttoolkit/js/exporttoolkit/startup.js',
-            '/bundles/elementsexporttoolkit/js/exporttoolkit/Plugin.js',
-            '/bundles/elementsexporttoolkit/js/exporttoolkit/config/configpanel.js',
-            '/bundles/elementsexporttoolkit/js/exporttoolkit/config/item.js',
-            '/bundles/elementsexporttoolkit/js/exporttoolkit/config/attributeconfig.js'
+            '/bundles/elementsexporttoolkit/js/startup.js',
+            '/bundles/elementsexporttoolkit/js/Plugin.js',
+            '/bundles/elementsexporttoolkit/js/config/configpanel.js',
+            '/bundles/elementsexporttoolkit/js/config/item.js',
+            '/bundles/elementsexporttoolkit/js/config/attributeconfig.js'
         ];
     }
 
@@ -60,5 +57,16 @@ class ElementsExportToolkitBundle extends AbstractPimcoreBundle
     public function getAdminIframePath()
     {
         return '/admin/elementsexporttoolkit/admin/settings';
+    }
+
+
+    protected function getComposerPackageName(): string
+    {
+        return 'elements/export-toolkit-bundle';
+    }
+
+    public function getNiceName()
+    {
+        return self::BUNDLE_NAME;
     }
 }

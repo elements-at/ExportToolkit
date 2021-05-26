@@ -16,15 +16,25 @@
 namespace Elements\Bundle\ExportToolkitBundle\Command;
 
 use Elements\Bundle\ExportToolkitBundle\ExportService;
+use Elements\Bundle\ExportToolkitBundle\Helper;
 use Elements\Bundle\ProcessManagerBundle\ExecutionTrait;
 use Pimcore\Console\AbstractCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Lock\LockFactory;
 
 class ExportCommand extends AbstractCommand
 {
     use ExecutionTrait;
+
+    protected LockFactory $lockFactory;
+
+    public function __construct(string $name = null, LockFactory $lockFactory)
+    {
+        parent::__construct($name);
+        $this->lockFactory = $lockFactory;
+    }
 
     protected function configure()
     {
@@ -45,10 +55,11 @@ class ExportCommand extends AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+
         $monitoringItemId = $input->getOption('monitoring-item-id');
         if (!$monitoringItemId) { //executed directly from export toolkit
-            $lockKey = 'exporttoolkit_'.$input->getOption('config-name');
-            \Pimcore\Model\Tool\Lock::acquire($lockKey);
+            $lock = Helper::getLock($this->lockFactory, $input->getOption('config-name'));
+            $lock->acquire(true);
         }
 
         $this->initProcessManager($input->getOption('monitoring-item-id'), ['autoCreate' => true, 'name' => $input->getOption('config-name')]);
@@ -56,7 +67,8 @@ class ExportCommand extends AbstractCommand
         $service->executeExport($input->getOption('config-name'));
 
         if (!$monitoringItemId) {
-            \Pimcore\Model\Tool\Lock::release($lockKey);
+            $lock->release();
         }
+        return 0;
     }
 }

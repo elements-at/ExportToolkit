@@ -1,13 +1,14 @@
 {
   "name": "elements/export-toolkit-bundle",
   "type": "pimcore-bundle",
+  "description": "The Export Toolkit provides functionality to configure exports of Pimcore objects",
   "require": {
-      "pimcore/pimcore": ">=6.0 <7.0",
-      "elements/process-manager-bundle": ">=3.0"
+      "pimcore/pimcore": ">=10.0",
+      "elements/process-manager-bundle": ">=4.0"
   },
   "autoload": {
     "psr-4": {
-        "": "src"
+      "Elements\\Bundle\\ExportToolkitBundle\\": "src"
     }
   },
   "extra": {

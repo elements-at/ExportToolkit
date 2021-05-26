@@ -78,7 +78,7 @@ class DefaultCsv extends AbstractAttributeClusterInterpreter
 
     public function setUpExport()
     {
-        if ($this->config->filename && $this->config->deleteFile) {
+        if (isset($this->config->filename) && isset($this->config->deleteFile) && $this->config->deleteFile ) {
             @unlink($this->getExportFile());
         }
     }

@@ -57,8 +57,8 @@ class Worker
         // add a default logger implementation so we can rely on a logger being set
         $this->logger = new NullLogger();
 
-        $classId = trim($workerConfig->getConfiguration()->general->pimcoreClass);
 
+        $classId = $workerConfig->getConfiguration()->general->pimcoreClass ?? false;
         if ($classId) {
             $class = ClassDefinition::getById($classId);
             $this->pimcoreClass = trim('\\Pimcore\\Model\\DataObject\\' . ucfirst($class->getName()));
@@ -66,14 +66,14 @@ class Worker
             $this->pimcoreClass = '\\Pimcore\\Model\\DataObject\\AbstractObject';
         }
 
-        $workerConfigClassName = trim($workerConfig->getConfiguration()->general->filterClass);
+        $workerConfigClassName = $workerConfig->getConfiguration()->general->filterClass ?? false;
         if (class_exists($workerConfigClassName)) {
             $this->workerConfigClass = new $workerConfigClassName();
         } else {
             $this->workerConfigClass = new DefaultFilter();
         }
 
-        $clusters = $workerConfig->getConfiguration()->attributeClusters;
+        $clusters = $workerConfig->getConfiguration()->attributeClusters ?? false;
         if ($clusters) {
             foreach ($clusters as $attributeCluster) {
                 if (class_exists($attributeCluster->clusterInterpreterClass)) {
@@ -172,7 +172,8 @@ class Worker
                                 }
 
                                 if (method_exists($object, $getter)) {
-                                    $value = $object->$getter($attribute->locale);
+                                    $locale = $attribute->locale ?? null;
+                                    $value = $object->$getter($locale);
                                 }
                             }
 

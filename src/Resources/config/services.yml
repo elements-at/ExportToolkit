@@ -11,9 +11,13 @@ services:
         tags:
             - { name: kernel.event_subscriber }
 
-
     exporttoolkit.exportservice:
         class: Elements\Bundle\ExportToolkitBundle\ExportService
 
     Elements\Bundle\ExportToolkitBundle\Command\:
         resource: '../../Command'
+
+    Elements\Bundle\ExportToolkitBundle\Controller\:
+        resource: '../../Controller'
+        public: true
+        tags: ['controller.service_arguments']
