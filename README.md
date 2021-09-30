@@ -69,6 +69,7 @@ Each attribute cluster has one or more attributes. An attribute is one data entr
 * Exports data to a json file.
 * Available configuration options:
   * filename: filename of exported file, relative to document root
+  * deleteFile: deletes file on startup
 
 ##### ExportToolkit_ExportService_AttributeClusterInterpreter_DefaultXml:
 * Exports data to a xml file.
@@ -76,6 +77,7 @@ Each attribute cluster has one or more attributes. An attribute is one data entr
   * filename: filename of exported file, relative to document root
   * rootElement: name for the root element in the xml file
   * rowElementName: name for the row element in the xml file
+  * deleteFile: deletes file on startup
 
 
 ### Getter Class
