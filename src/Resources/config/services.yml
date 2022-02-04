@@ -16,6 +16,8 @@ services:
 
     Elements\Bundle\ExportToolkitBundle\Command\:
         resource: '../../Command'
+        arguments:
+            $name: 'export_name' 
 
     Elements\Bundle\ExportToolkitBundle\Controller\:
         resource: '../../Controller'
