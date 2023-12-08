@@ -28,12 +28,9 @@ class ExportCommand extends AbstractCommand
 {
     use ExecutionTrait;
 
-    protected LockFactory $lockFactory;
-
-    public function __construct(string $name = null, LockFactory $lockFactory)
+    public function __construct(protected LockFactory $lockFactory,string $name = null)
     {
         parent::__construct($name);
-        $this->lockFactory = $lockFactory;
     }
 
     protected function configure()
