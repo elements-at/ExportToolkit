@@ -23,12 +23,12 @@ class Installer extends AbstractInstaller
     /**
      * {@inheritdoc}
      */
-    public function isInstalled()
+    public function isInstalled(): bool
     {
         return file_exists(Helper::getConfigFilePath());
     }
 
-    public function needsReloadAfterInstall()
+    public function needsReloadAfterInstall(): bool
     {
         return true;
     }
@@ -36,7 +36,7 @@ class Installer extends AbstractInstaller
     /**
      * {@inheritdoc}
      */
-    public function canBeInstalled()
+    public function canBeInstalled(): bool
     {
         return !$this->isInstalled();
     }
@@ -44,7 +44,7 @@ class Installer extends AbstractInstaller
     /**
      * {@inheritdoc}
      */
-    public function install()
+    public function install(): void
     {
         // create backend permission
         \Pimcore\Model\User\Permission\Definition::create('plugin_exporttoolkit_config');
@@ -57,6 +57,6 @@ class Installer extends AbstractInstaller
             File::putPhpFile(Helper::getConfigFilePath(), to_php_data_file_format($defaultConfig));
         }
 
-        return true;
+        parent::install();
     }
 }

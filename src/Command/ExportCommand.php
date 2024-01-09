@@ -30,10 +30,13 @@ class ExportCommand extends AbstractCommand
 
     protected LockFactory $lockFactory;
 
-    public function __construct(string $name = null, LockFactory $lockFactory)
+    protected ExportService $exportService;
+
+    public function __construct(LockFactory $lockFactory, ExportService $exportService, string $name = null)
     {
         parent::__construct($name);
         $this->lockFactory = $lockFactory;
+        $this->exportService = $exportService;
     }
 
     protected function configure()
@@ -63,8 +66,7 @@ class ExportCommand extends AbstractCommand
         }
 
         $this->initProcessManager($input->getOption('monitoring-item-id'), ['autoCreate' => true, 'name' => $input->getOption('config-name')]);
-        $service = new ExportService();
-        $service->executeExport($input->getOption('config-name'));
+        $this->exportService->executeExport($input->getOption('config-name'));
 
         if (!$monitoringItemId) {
             $lock->release();

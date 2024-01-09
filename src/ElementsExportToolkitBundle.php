@@ -17,9 +17,18 @@ namespace Elements\Bundle\ExportToolkitBundle;
 
 use Pimcore\Extension\Bundle\AbstractPimcoreBundle;
 use Pimcore\Extension\Bundle\Installer\InstallerInterface;
+use \Pimcore\Extension\Bundle\PimcoreBundleAdminClassicInterface;
+use Pimcore\Routing\RouteReferenceInterface;
+use Pimcore\Extension\Bundle\Traits\BundleAdminClassicTrait;
+use Pimcore\HttpKernel\Bundle\DependentBundleInterface;
+use Pimcore\Bundle\AdminBundle\PimcoreAdminBundle;
+use Pimcore\HttpKernel\BundleCollection\BundleCollection;
+use Pimcore\Extension\Bundle\Traits\PackageVersionTrait;
 
-class ElementsExportToolkitBundle extends AbstractPimcoreBundle
+class ElementsExportToolkitBundle extends AbstractPimcoreBundle implements PimcoreBundleAdminClassicInterface, DependentBundleInterface
 {
+    use PackageVersionTrait;
+    use BundleAdminClassicTrait;
 
     const BUNDLE_NAME = 'ElementsExportToolkitBundle';
 
@@ -41,12 +50,23 @@ class ElementsExportToolkitBundle extends AbstractPimcoreBundle
         ];
     }
 
+    public function getEditmodeJsPaths(): array
+    {
+        return [];
+    }
+
+
+    public function getEditmodeCssPaths(): array
+    {
+        return [];
+    }
+
     /**
      * If the bundle has an installation routine, an installer is responsible of handling installation related tasks
      *
      * @return InstallerInterface|null
      */
-    public function getInstaller()
+    public function getInstaller(): ?InstallerInterface
     {
         return new Installer();
     }
@@ -65,8 +85,13 @@ class ElementsExportToolkitBundle extends AbstractPimcoreBundle
         return 'elements/export-toolkit-bundle';
     }
 
-    public function getNiceName()
+    public function getNiceName(): string
     {
         return self::BUNDLE_NAME;
+    }
+
+    public static function registerDependentBundles(BundleCollection $collection): void
+    {
+        $collection->addBundle(new PimcoreAdminBundle(), 60);
     }
 }

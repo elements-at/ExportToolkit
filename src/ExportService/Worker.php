@@ -287,7 +287,7 @@ class Worker
     {
         if ($this->workerConfig->getConfiguration()->general->sqlCondition) {
             $list = $this->getObjectList();
-            $list->addConditionParam('o_id = ?', $object->getId());
+            $list->addConditionParam('id = ?', $object->getId());
 
             $idList = $list->loadIdList();
             if (empty($idList)) {

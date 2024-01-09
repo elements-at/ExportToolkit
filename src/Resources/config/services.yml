@@ -3,6 +3,9 @@ services:
         autowire: true
         autoconfigure: true
 
+    export_toolkit.logger:
+        alias: monolog.logger.export_toolkit
+
     exporttoolkit.event_listener:
         class: Elements\Bundle\ExportToolkitBundle\EventListener\ExportListener
 #        lazy: true
@@ -13,11 +16,16 @@ services:
 
     exporttoolkit.exportservice:
         class: Elements\Bundle\ExportToolkitBundle\ExportService
+        calls:
+            - [setLogger, ['@export_toolkit.logger']]
 
     Elements\Bundle\ExportToolkitBundle\Command\:
         resource: '../../Command'
+        arguments:
+            $exportService: '@exporttoolkit.exportservice'
 
     Elements\Bundle\ExportToolkitBundle\Controller\:
         resource: '../../Controller'
         public: true
         tags: ['controller.service_arguments']
+

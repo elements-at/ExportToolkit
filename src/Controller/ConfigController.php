@@ -19,8 +19,8 @@ use Elements\Bundle\ExportToolkitBundle\Configuration;
 use Elements\Bundle\ExportToolkitBundle\Configuration\Dao;
 use Elements\Bundle\ExportToolkitBundle\ExportService\IExecutor;
 use Elements\Bundle\ExportToolkitBundle\Helper;
-use Pimcore\Bundle\AdminBundle\Controller\AdminController;
 use Pimcore\Cache;
+use Pimcore\Bundle\AdminBundle\Controller\AdminAbstractController;
 use Pimcore\Logger;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -30,7 +30,7 @@ use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/admin/elementsexporttoolkit/config')]
-class ConfigController extends AdminController
+class ConfigController extends AdminAbstractController
 {
 
     public function upgradeAction()
@@ -266,7 +266,7 @@ class ConfigController extends AdminController
             throw new Exception('Name does not exist.');
         }
 
-        if ($configuration && isset($configuration->configuration->general->executor)) {
+        if ($configuration && !empty($configuration->configuration->general->executor)) {
             /** @var $className IExecutor */
             $className = $configuration->configuration->general->executor;
             $cli = $className::getCli($name, null);

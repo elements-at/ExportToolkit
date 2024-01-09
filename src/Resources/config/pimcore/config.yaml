@@ -1,0 +1,9 @@
+monolog:
+    handlers:
+        export_toolkit_log_handler:
+            level:    debug
+            type:     stream
+            path:     '%kernel.logs_dir%/export-toolkit.log'
+            channels: [export_toolkit]
+    channels: [export_toolkit]
+

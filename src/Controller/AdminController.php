@@ -20,10 +20,10 @@ use Pimcore\Bundle\AdminBundle\Security\CsrfProtectionHandler;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use \Pimcore\Bundle\AdminBundle\Controller\AdminController as PimcoreAdminController;
+use Pimcore\Controller\UserAwareController;
 
 #[Route('/admin/elementsexporttoolkit/admin')]
-class AdminController extends PimcoreAdminController
+class AdminController extends UserAwareController
 {
 
     #[Route('/settings', methods: ['GET'], name: 'elementsexporttoolkit-admin-settings')]

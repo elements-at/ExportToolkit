@@ -16,7 +16,7 @@
 
 pimcore.registerNS("pimcore.plugin.outputDataConfigToolkit.Plugin");
 
-pimcore.plugin.outputDataConfigToolkit.Plugin = Class.create(pimcore.plugin.admin, {
+pimcore.plugin.outputDataConfigToolkit.Plugin = Class.create({
 
 
     getClassName: function () {
@@ -24,7 +24,6 @@ pimcore.plugin.outputDataConfigToolkit.Plugin = Class.create(pimcore.plugin.admi
     },
 
     initialize: function() {
-        pimcore.plugin.broker.registerPlugin(this);
     },
 
 
