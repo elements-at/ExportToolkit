@@ -20,7 +20,7 @@ services:
             - [setLogger, ['@export_toolkit.logger']]
 
     Elements\Bundle\ExportToolkitBundle\ExportService:
-        alias: "@exporttoolkit.exportservice"
+        alias: "exporttoolkit.exportservice"
 
     Elements\Bundle\ExportToolkitBundle\Command\:
         resource: '../../Command'
