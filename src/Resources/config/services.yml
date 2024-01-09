@@ -19,6 +19,9 @@ services:
         calls:
             - [setLogger, ['@export_toolkit.logger']]
 
+    Elements\Bundle\ExportToolkitBundle\ExportService:
+        alias: "@exporttoolkit.exportservice"
+
     Elements\Bundle\ExportToolkitBundle\Command\:
         resource: '../../Command'
         arguments:
