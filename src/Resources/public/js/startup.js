@@ -8,16 +8,6 @@ pimcore.plugin.ExportToolkit = Class.create({
     initialize: function() {
         if (pimcore.events.preMenuBuild) {
             document.addEventListener(pimcore.events.preMenuBuild, this.preMenuBuild.bind(this));
-        } else {
-            document.addEventListener(pimcore.events.pimcoreReady, this.pimcoreReady.bind(this));
-        }
-
-    },
- 
-    pimcoreReady: function (params,broker){
-        if(pimcore.globalmanager.get("user").isAllowed("plugin_exporttoolkit_config")) {
-
-
         }
 
     },
@@ -52,21 +42,12 @@ pimcore.plugin.ExportToolkit = Class.create({
     },
 
     initMenu: function() {
-        var user = pimcore.globalmanager.get('user');
-
         // add to menu
-
-        var menuOptions = pimcore.settings.cmf.shortcutFilterDefinitions.length ? {
-            cls: "pimcore_navigation_flyout",
-            shadow: false,
-            items: []
-        } : null;
-
         let cacheClearMenuItem =  {
             text: t('plugin_exporttoolkit_clear_config_cache'),
             iconCls: 'plugin_exporttoolkit_clear_config_cache',
             hideOnClick: true,
-            menu: menuOptions,
+            menu: null,
             handler: function () {
                 Ext.Ajax.request({
                     url: '/admin/elementsexporttoolkit/config/clear-cache'
@@ -78,7 +59,7 @@ pimcore.plugin.ExportToolkit = Class.create({
             text: t('plugin_exporttoolkit_configpanel'),
             iconCls: 'plugin_exporttoolkit_configpanel',
             hideOnClick: true,
-            menu: menuOptions,
+            menu: null,
             handler: function () {
                 try {
                     pimcore.globalmanager.get("plugin_exporttoolkit_configpanel").activate();
