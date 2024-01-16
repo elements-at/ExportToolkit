@@ -8,7 +8,6 @@ services:
 
     exporttoolkit.event_listener:
         class: Elements\Bundle\ExportToolkitBundle\EventListener\ExportListener
-#        lazy: true
         arguments:
             - "@exporttoolkit.exportservice"
         tags:
@@ -16,6 +15,7 @@ services:
 
     exporttoolkit.exportservice:
         class: Elements\Bundle\ExportToolkitBundle\ExportService
+        lazy: true
         calls:
             - [setLogger, ['@export_toolkit.logger']]
 
